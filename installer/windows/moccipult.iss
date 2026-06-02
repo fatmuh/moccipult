@@ -34,8 +34,6 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 Source: "bin\moccipult.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "bin\shorebird.exe"; DestDir: "{app}\bin"; Flags: ignoreversion skipifsourcedoesntexist
-Source: "setup-shorebird.bat"; DestDir: "{app}"; Flags: ignoreversion
 
 
 [Icons]
