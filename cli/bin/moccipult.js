@@ -433,295 +433,117 @@ patchesCmd
     }
   });
 
+
 // ─── SETUP SHOREBIRD ─────────────────────────────────────────────────────────
 program
   .command("setup-shorebird")
-  .description("Auto-setup Shorebird CLI — clone, patch URLs, build, install to PATH")
-  .option("--shorebird-path <path>", "Custom directory to store Shorebird workspace")
-  .option("--skip-build", "Skip building, just clone & patch")
+  .description("Install Shorebird CLI resmi + patch URL ke server Moccipult")
+  .option("--shorebird-path <path>", "Path ke instalasi Shorebird (auto-detect)")
   .action(async (opts) => {
     console.log(chalk.bold.cyan(BANNER));
     console.log(chalk.bold("  🔧 Shorebird CLI Setup\n"));
 
     const serverUrl = getServer();
     console.log(chalk.dim(`  Target server: ${serverUrl}`));
-
-    const ws = opts.shorebirdPath || path.join(os.homedir(), ".moccipult", "shorebird-workspace");
-    console.log(chalk.dim(`  Workspace: ${ws}`));
     console.log();
 
     const { execSync } = require("child_process");
-
-    const run = (cmd, label) => {
-      try {
-        execSync(cmd, { stdio: "pipe", cwd: ws, shell: true });
-        ok(label);
-      } catch (err) {
-        fail(label + " — " + err.stderr?.toString().split("\n").slice(-3).join("").trim());
-        throw err;
-      }
-    };
-
     const ok = (msg) => console.log(chalk.green("  ✅ " + msg));
     const fail = (msg) => console.log(chalk.red("  ❌ " + msg));
 
     try {
-      // Check prerequisites
-      const spinner0 = ora("Checking prerequisites...").start();
-      const missing = [];
-      try { execSync("git --version", { stdio: "pipe" }); } catch { missing.push("git"); }
-      try { execSync("rustc --version", { stdio: "pipe" }); } catch { missing.push("rust (rustup.rs)"); }
-      try { execSync("dart --version", { stdio: "pipe" }); } catch { missing.push("dart (Flutter SDK)"); }
-      try { execSync("protoc --version", { stdio: "pipe" }); } catch { missing.push("protobuf"); }
+      // ── Step 1: Find existing Shorebird installation ──
+      let sbPath = opts.shorebirdPath;
+      if (!sbPath) {
+        const possiblePaths = [
+          path.join(os.homedir(), ".shorebird"),
+          path.join(process.env.LOCALAPPDATA || "", "shorebird"),
+          path.join(process.env.USERPROFILE || "", ".shorebird"),
+          path.join(process.env.USERPROFILE || "", "AppData", "Local", "shorebird"),
+        ];
+        for (const p of possiblePaths) {
+          if (fs.existsSync(path.join(p, "bin", "shorebird")) || fs.existsSync(path.join(p, "bin", "shorebird.exe"))) {
+            sbPath = p;
+            break;
+          }
+        }
+      }
 
-      if (missing.length > 0) {
-        spinner0.fail(chalk.red(`Missing: ${missing.join(", ")}`));
-        console.log(chalk.dim("  Install them first, then run this command again."));
+      // ── Step 2: Install Shorebird if not found ──
+      if (!sbPath) {
+        console.log(chalk.yellow("  Shorebird CLI belum terinstall.\n"));
+        console.log(chalk.bold("  Install dulu:"));
+
+        if (process.platform === "win32") {
+          console.log(chalk.white("  1. Buka PowerShell"));
+          console.log(chalk.cyan("     Invoke-RestMethod https://raw.githubusercontent.com/nicoverbruggen/shorebird-installer/main/install.ps1 | Invoke-Expression"));
+        } else {
+          console.log(chalk.cyan("     curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/nicoverbruggen/shorebird-installer/main/install.sh | sh"));
+        }
+        console.log();
+        console.log(chalk.white("  2. Setelah selesai, jalankan lagi:"));
+        console.log(chalk.cyan("     moccipult setup-shorebird"));
+        console.log();
         return;
       }
-      spinner0.succeed("Prerequisites OK");
 
-      // Create workspace
-      fs.ensureDirSync(ws);
+      ok(`Shorebird found: ${sbPath}`);
 
-      // Clone shorebird
-      const sbDir = path.join(ws, "shorebird");
-      const upDir = path.join(ws, "updater");
-
-      const spinner1 = ora("Cloning Shorebird CLI...").start();
-      if (!fs.existsSync(sbDir)) {
-        execSync("git clone --depth 1 https://github.com/shorebirdtech/shorebird.git", { stdio: "pipe", cwd: ws });
-        spinner1.succeed("Shorebird CLI cloned");
-      } else {
-        spinner1.succeed("Shorebird CLI already exists");
+      // ── Step 3: Verify ──
+      const ext = process.platform === "win32" ? ".exe" : "";
+      const sbBin = path.join(sbPath, "bin", `shorebird${ext}`);
+      if (!fs.existsSync(sbBin)) {
+        fail(`Binary not found: ${sbBin}`);
+        return;
       }
 
-      const spinner2 = ora("Cloning Shorebird updater...").start();
-      if (!fs.existsSync(upDir)) {
-        execSync("git clone --depth 1 https://github.com/shorebirdtech/updater.git", { stdio: "pipe", cwd: ws });
-        spinner2.succeed("Shorebird updater cloned");
-      } else {
-        spinner2.succeed("Shorebird updater already exists");
-      }
-
-      // Patch URLs
+      // ── Step 4: Patch URLs ──
       const spinner3 = ora(`Patching URLs to ${serverUrl}...`).start();
-      // Write patch_repos.py to temp location (needed because pkg binary can't bundle it)
+
       const tmpPatchScript = path.join(os.tmpdir(), "moccipult-patch-repos.py");
       const embeddedPatchScript = path.join(__dirname, "..", "..", "patch_repos.py");
       let patchScript;
       if (fs.existsSync(embeddedPatchScript)) {
         patchScript = embeddedPatchScript;
       } else {
-        // Running as compiled binary — download from GitHub
-        const spinnerDl = ora("Downloading patch script...").start();
         try {
           const resp = await fetch("https://raw.githubusercontent.com/fatmuh/moccipult/master/patch_repos.py");
           const scriptContent = await resp.text();
           fs.writeFileSync(tmpPatchScript, scriptContent, "utf-8");
           patchScript = tmpPatchScript;
-          spinnerDl.succeed("Patch script downloaded");
         } catch (dlErr) {
-          spinnerDl.fail("Failed to download patch script");
+          spinner3.fail("Failed to download patch script");
           throw dlErr;
         }
       }
+
       const pythonCmd = process.platform === "win32" ? "py" : "python3";
-      const execOpts = { stdio: "pipe", cwd: ws, shell: true, env: { ...process.env, PYTHONIOENCODING: "utf-8" } };
+      const execOpts = { stdio: "pipe", shell: true, env: { ...process.env, PYTHONIOENCODING: "utf-8" } };
       execSync(
-        `${pythonCmd} "${patchScript}" --shorebird-path "${sbDir}" --updater-path "${upDir}" --target-url "${serverUrl}"`,
+        `${pythonCmd} "${patchScript}" --shorebird-path "${sbPath}" --target-url "${serverUrl}"`,
         execOpts
       );
       spinner3.succeed(`URLs patched to ${serverUrl}`);
 
-      if (opts.skipBuild) {
-        console.log(chalk.yellow("\n  ⚠️  --skip-build: skipping build. Build manually with:"));
-        console.log(chalk.dim(`    cd ${sbDir} && dart compile exe ${entryPoint} -o shorebird`));
-        return;
-      }
-
-      // Build updater
-      const spinner4 = ora("Building updater (Rust)...").start();
-      execSync("cargo build --release", { stdio: "pipe", cwd: upDir });
-      spinner4.succeed("Updater built");
-
-      // Find entry point — Shorebird repo structure may vary across versions
-      const possibleEntryPoints = [
-        "bin/shorebird.dart",
-        "bin/shorebird.dart", 
-        "packages/shorebird_cli/bin/shorebird.dart",
-        "packages/shorebird_cli/bin/main.dart",
-      ];
-      let entryPoint = null;
-      for (const ep of possibleEntryPoints) {
-        if (fs.existsSync(path.join(sbDir, ep))) {
-          entryPoint = ep;
-          break;
-        }
-      }
-      if (!entryPoint) {
-        // Try to find any main entry point
-        const binDir = path.join(sbDir, "bin");
-        if (fs.existsSync(binDir)) {
-          const files = fs.readdirSync(binDir).filter(f => f.endsWith(".dart"));
-          if (files.length > 0) {
-            entryPoint = `bin/${files[0]}`;
-            console.log(chalk.dim(`  Found entry point: ${entryPoint}`));
-          }
-        }
-        // Check packages/shorebird_cli too
-        const cliBinDir = path.join(sbDir, "packages", "shorebird_cli", "bin");
-        if (!entryPoint && fs.existsSync(cliBinDir)) {
-          const files = fs.readdirSync(cliBinDir).filter(f => f.endsWith(".dart"));
-          if (files.length > 0) {
-            entryPoint = `packages/shorebird_cli/bin/${files[0]}`;
-            console.log(chalk.dim(`  Found entry point: ${entryPoint}`));
-          }
-        }
-      }
-      if (!entryPoint) {
-        throw new Error(
-          "Could not find Shorebird CLI entry point.\n" +
-          "The repo structure may have changed.\n" +
-          "Please report this issue: https://github.com/fatmuh/moccipult/issues"
-        );
-      }
-      console.log(chalk.dim(`  Entry point: ${entryPoint}`));
-
-      const spinner5 = ora("Building Shorebird CLI...").start();
-      // Run pub get at root and sub-packages
-      execSync("dart pub get", { stdio: "pipe", cwd: sbDir, shell: true });
-      const cliPkg = path.join(sbDir, "packages", "shorebird_cli");
-      if (fs.existsSync(cliPkg)) {
-        execSync("dart pub get", { stdio: "pipe", cwd: cliPkg, shell: true });
-      }
-      const ext = process.platform === "win32" ? ".exe" : "";
-      const sbBin = path.join(sbDir, `shorebird${ext}`);
-      execSync(`dart compile exe ${entryPoint} -o "${sbBin}"`, { stdio: "pipe", cwd: sbDir });
-      spinner5.succeed("Shorebird CLI built");
-
-      // Install to moccipult bin
-      const moccBin = path.join(os.homedir(), ".moccipult", "bin");
-      fs.ensureDirSync(moccBin);
-      const dest = path.join(moccBin, `shorebird${ext}`);
-      fs.copyFileSync(sbBin, dest);
-      fs.chmodSync(dest, 0o755);
-
+      // ── Done! ──
       console.log();
-      console.log(chalk.bold.green("  ✅ Shorebird CLI installed!"));
-      console.log(chalk.dim(`  Binary: ${dest}`));
+      console.log(chalk.bold.green("  ✅ Shorebird CLI siap!"));
+      console.log(chalk.dim(`  Binary: ${sbBin}`));
       console.log(chalk.dim(`  Server: ${serverUrl}`));
       console.log();
       console.log(chalk.yellow("  Langkah selanjutnya:"));
-      console.log(chalk.white("  1. Buka terminal BARU (reload PATH)"));
+      console.log(chalk.white("  1. Buka terminal BARU"));
       console.log(chalk.white("  2. cd /path/to/flutter/app"));
       console.log(chalk.white("  3. shorebird login"));
       console.log(chalk.white("  4. shorebird release android"));
       console.log(chalk.white("  5. Fix bug, lalu: shorebird patch android"));
       console.log();
+      console.log(chalk.dim("  ⚠️  Kalau Shorebird update & URL ke-reset:"));
+      console.log(chalk.dim("     Jalankan lagi: moccipult setup-shorebird"));
+      console.log();
 
     } catch (err) {
       console.error(chalk.red("\n  ❌ Setup gagal:"), err.message?.split("\n").slice(-3).join("\n"));
-      console.error(chalk.dim("  Cek error di atas. Mungkin ada prerequisite yang belum terinstall."));
-    }
-  });
-
-program
-  .command("init")
-  .description("Interactive quick setup — register app + create release")
-  .action(async () => {
-    console.log(chalk.bold.cyan(BANNER));
-    console.log(chalk.bold("  Welcome to Moccipult — Self-hosted Code Push\n"));
-    console.log(chalk.dim(`  Server: ${getServer()}\n`));
-
-    try {
-      const answers = await inquirer.prompt([
-        {
-          type: "input",
-          name: "name",
-          message: "📱 App name:",
-          default: path.basename(process.cwd()),
-        },
-        {
-          type: "input",
-          name: "package",
-          message: "📦 Package name (e.g. com.example.app):",
-        },
-        {
-          type: "list",
-          name: "platform",
-          message: "📱 Platform:",
-          choices: ["android", "ios"],
-          default: "android",
-        },
-        {
-          type: "input",
-          name: "version",
-          message: "🏷️  Version:",
-          default: "1.0.0",
-        },
-        {
-          type: "list",
-          name: "channel",
-          message: "📢 Channel:",
-          choices: ["stable", "beta"],
-          default: "stable",
-        },
-      ]);
-
-      console.log();
-
-      // Create app
-      const spinner1 = ora("Registering app...").start();
-      const appResult = await api("POST", "/api/v1/apps", {
-        name: answers.name,
-        package_name: answers.package,
-        platform: answers.platform,
-      });
-      spinner1.succeed(chalk.green("App registered!"));
-
-      // Create release
-      const spinner2 = ora("Creating release...").start();
-      const relResult = await api("POST", "/api/v1/releases", {
-        app_id: appResult.app.id,
-        version: answers.version,
-        platform: answers.platform,
-        channel: answers.channel,
-      });
-      spinner2.succeed(chalk.green("Release created!"));
-
-      // Save to global config
-      config.set("lastAppId", appResult.app.id);
-      config.set("lastReleaseId", relResult.release.id);
-
-      // Write .moccipult.json in current directory
-      const localConfig = {
-        appId: appResult.app.id,
-        releaseId: relResult.release.id,
-        appName: answers.name,
-        version: answers.version,
-        platform: answers.platform,
-        channel: answers.channel,
-      };
-      fs.writeJsonSync(path.join(process.cwd(), ".moccipult.json"), localConfig, { spaces: 2 });
-
-      console.log();
-      console.log(chalk.bold.green("✅ Setup complete!"));
-      console.log();
-      console.log(chalk.bold("  Summary:"));
-      console.log(chalk.dim("  ─────────────────────────────────"));
-      console.log(`  App ID:      ${chalk.cyan(appResult.app.id)}`);
-      console.log(`  Release ID:  ${chalk.cyan(relResult.release.id)}`);
-      console.log(`  Config:      ${chalk.gray(".moccipult.json")}`);
-      console.log();
-      console.log(chalk.yellow("  Next steps:"));
-      console.log(chalk.white("  1. Build your Flutter app"));
-      console.log(chalk.white("  2. Generate a patch file"));
-      console.log(chalk.white(`  3. Run: ${chalk.cyan("moccipult patches upload -r " + relResult.release.id + " -f patch.bin")}`));
-      console.log();
-    } catch (err) {
-      console.error(chalk.red("\n❌ Setup failed:"), err.message);
-      console.error(chalk.dim("Make sure your server is running: " + getServer()));
     }
   });
 
