@@ -68,24 +68,14 @@ jobs:
               try {
                 const versions = await github.paginate(
                   github.rest.packages.getAllPackageVersionsForPackageOwnedByUser,
-                  {
-                    username: owner,
-                    package_type: packageType,
-                    package_name: packageName,
-                    per_page: 100,
-                  }
+                  { username: owner, package_type: packageType, package_name: packageName, per_page: 100 }
                 )
                 return { scope: "user", versions }
               } catch (error) {
                 if (error.status !== 404) throw error
                 const versions = await github.paginate(
                   github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg,
-                  {
-                    org: owner,
-                    package_type: packageType,
-                    package_name: packageName,
-                    per_page: 100,
-                  }
+                  { org: owner, package_type: packageType, package_name: packageName, per_page: 100 }
                 )
                 return { scope: "org", versions }
               }
@@ -94,19 +84,12 @@ jobs:
             async function deleteVersion(scope, id) {
               if (scope === "user") {
                 await github.rest.packages.deletePackageVersionForUser({
-                  username: owner,
-                  package_type: packageType,
-                  package_name: packageName,
-                  package_version_id: id,
+                  username: owner, package_type: packageType, package_name: packageName, package_version_id: id
                 })
                 return
               }
-
               await github.rest.packages.deletePackageVersionForOrg({
-                org: owner,
-                package_type: packageType,
-                package_name: packageName,
-                package_version_id: id,
+                org: owner, package_type: packageType, package_name: packageName, package_version_id: id
               })
             }
 
@@ -115,24 +98,22 @@ jobs:
 
             const keepIds = new Set(
               versions
-                .filter((version) => (version.metadata?.container?.tags || []).includes("latest"))
-                .map((version) => version.id)
+                .filter((v) => (v.metadata?.container?.tags || []).includes("latest"))
+                .map((v) => v.id)
             )
 
             if (keepIds.size === 0) {
-              core.warning("No version tagged latest found yet. Skipping cleanup to avoid deleting valid manifests.")
+              core.warning("No version tagged latest found yet. Skipping cleanup.")
               return
             }
 
-            const deletable = versions.filter((version) => {
-              const tags = version.metadata?.container?.tags || []
+            for (const v of versions.filter((v) => {
+              const tags = v.metadata?.container?.tags || []
               return tags.length > 0 && !tags.includes("latest")
-            })
-
-            for (const version of deletable) {
-              const tags = version.metadata?.container?.tags || []
-              core.info(`Deleting version ${version.id} tags=[${tags.join(",")}]`)
-              await deleteVersion(scope, version.id)
+            })) {
+              const tags = v.metadata?.container?.tags || []
+              core.info(`Deleting version ${v.id} tags=[${tags.join(",")}]`)
+              await deleteVersion(scope, v.id)
             }
 
             core.info(`Kept version IDs: ${Array.from(keepIds).join(", ")}`)
@@ -163,54 +144,158 @@ jobs:
         id: version
         run: |
           PREV="${{ steps.prev-tag.outputs.tag }}"
-          
           if [ -z "$PREV" ]; then
-            # No tags yet, start from v1.0.0
             NEW_VERSION="v1.0.0"
           else
-            # Strip 'v' prefix
             NUM="${PREV#v}"
-            
-            # Parse major.minor.patch
             MAJOR=$(echo "$NUM" | cut -d. -f1)
             MINOR=$(echo "$NUM" | cut -d. -f2)
             PATCH=$(echo "$NUM" | cut -d. -f3)
-            
-            # Auto bump patch
             PATCH=$((PATCH + 1))
-            
             NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
           fi
-          
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "New version: $NEW_VERSION"
 
       - name: Check if tag already exists
         id: check
         run: |
-          if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "Tag ${{ steps.version.outputs.version }} already exists, bumping patch again"
-            
-            # Tag exists, bump patch once more
-            PREV="${{ steps.version.outputs.version }}"
-            NUM="${PREV#v}"
+          TAG="${{ steps.version.outputs.version }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists, bumping patch again"
+            NUM="${TAG#v}"
             MAJOR=$(echo "$NUM" | cut -d. -f1)
             MINOR=$(echo "$NUM" | cut -d. -f2)
             PATCH=$(echo "$NUM" | cut -d. -f3)
             PATCH=$((PATCH + 1))
             NEW="v${MAJOR}.${MINOR}.${PATCH}"
             echo "version=$NEW" >> $GITHUB_OUTPUT
-            echo "Adjusted version: $NEW"
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "version=$TAG" >> $GITHUB_OUTPUT
           fi
 
       - name: Create and push tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ steps.check.outputs.version || steps.version.outputs.version }}"
+          TAG="${{ steps.check.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "$TAG" -m "Release $TAG — build #${{ github.run_number }}"
           git push origin "$TAG"
           echo "✅ Created tag: $TAG"
+
+      - name: Save version for next job
+        id: output
+        run: echo "version=${{ steps.check.outputs.version }}" >> $GITHUB_OUTPUT
+
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+
+  # ──────────────────────────────────────────────
+  # Job 3: Build CLI binaries (all platforms)
+  # ──────────────────────────────────────────────
+  build-cli:
+    needs: auto-tag
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: node18-win-x64
+            output: moccipult-windows.exe
+            artifact: moccipult-windows
+          - os: ubuntu-latest
+            target: node18-linux-x64
+            output: moccipult-linux
+            artifact: moccipult-linux
+          - os: macos-latest
+            target: node18-macos-x64
+            output: moccipult-macos
+            artifact: moccipult-macos
+          - os: macos-latest
+            target: node18-macos-arm64
+            output: moccipult-macos-arm
+            artifact: moccipult-macos-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: cli
+        run: npm install
+
+      - name: Build binary
+        working-directory: cli
+        run: npx pkg . --targets ${{ matrix.target }} --output dist/${{ matrix.output }} --compress GZip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: cli/dist/${{ matrix.output }}
+          if-no-files-found: error
+
+  # ──────────────────────────────────────────────
+  # Job 4: Create GitHub Release
+  # ──────────────────────────────────────────────
+  release:
+    needs: [auto-tag, build-cli]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: List files
+        run: find dist -type f -ls
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.auto-tag.outputs.version }}
+          name: "Moccipult ${{ needs.auto-tag.outputs.version }}"
+          body: |
+            ## 🚀 Moccipult ${{ needs.auto-tag.outputs.version }}
+
+            ### Downloads
+            | Platform | File |
+            |----------|------|
+            | Windows x64 | `moccipult-windows.exe` |
+            | Linux x64 | `moccipult-linux` |
+            | macOS x64 | `moccipult-macos` |
+            | macOS ARM | `moccipult-macos-arm` |
+
+            ### Docker
+            ```bash
+            docker pull ghcr.io/${{ github.repository_owner }}/moccipult:${{ needs.auto-tag.outputs.version }}
+            docker pull ghcr.io/${{ github.repository_owner }}/moccipult:latest
+            ```
+
+            ### Quick Start
+            ```bash
+            moccipult config server https://your-server.com
+            moccipult init
+            moccipult patches upload -r <RELEASE_ID> -f patch.bin
+            ```
+          files: |
+            dist/moccipult-windows/moccipult-windows.exe
+            dist/moccipult-linux/moccipult-linux
+            dist/moccipult-macos/moccipult-macos
+            dist/moccipult-macos-arm/moccipult-macos-arm
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
