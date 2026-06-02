@@ -507,7 +507,7 @@ program
       // Patch URLs
       const spinner3 = ora(`Patching URLs to ${serverUrl}...`).start();
       const patchScript = path.join(__dirname, "..", "..", "patch_repos.py");
-      const pythonCmd = process.platform === "win32" ? "python" : "python3";
+      const pythonCmd = process.platform === "win32" ? "py" : "python3";
       execSync(
         `${pythonCmd} "${patchScript}" --shorebird-path "${sbDir}" --updater-path "${upDir}" --target-url "${serverUrl}"`,
         { stdio: "pipe" }
