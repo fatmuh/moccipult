@@ -767,7 +767,7 @@ cd moccipult
       <tr><td>Git</td><td>Clone repo</td><td><a href="https://git-scm.com" target="_blank">git-scm.com</a></td><td><code>git --version</code></td></tr>
       <tr><td>Rust</td><td>Build updater native (jalan di HP)</td><td><a href="https://rustup.rs" target="_blank">rustup.rs</a></td><td><code>rustc --version</code></td></tr>
       <tr><td>Flutter SDK</td><td>Build Shorebird CLI (Dart)</td><td><a href="https://flutter.dev" target="_blank">flutter.dev</a></td><td><code>flutter --version</code></td></tr>
-      <tr><td>Protobuf</td><td>ProtocolBuffers untuk updater</td><td><code>apt install protobuf-compiler</code></td><td><code>protoc --version</code></td></tr>
+      <tr><td>Protobuf</td><td>ProtocolBuffers untuk updater</td><td><code>choco install protobuf</code> (Win) / <code>brew install protobuf</code> (Mac) / <code>apt install protobuf-compiler</code> (Linux)</td><td><code>protoc --version</code></td></tr>
       <tr><td>Python 3</td><td>Jalanin patch_repos.py</td><td>sudah ada biasanya</td><td><code>python3 --version</code></td></tr>
     </table>
   </div>
@@ -905,15 +905,29 @@ cd ~/shorebird-workspace/shorebird && dart pub get && dart compile exe bin/shore
 
 <div class="card">
   <h4>❌ <code>rustc: command not found</code></h4>
-<pre><code># Install Rust:
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></pre>
+<pre><code># macOS / Linux:
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Windows:
+# Download installer dari https://rustup.rs
+# Atau: winget install Rustlang.Rustup</code></pre>
 </div>
 
 <div class="card">
   <h4>❌ <code>protoc: command not found</code></h4>
-<pre><code>sudo apt install protobuf-compiler  # Ubuntu/Debian
-brew install protobuf                 # macOS
-choco install protobuf                # Windows</code></pre>
+<pre><code># Windows (pilih salah satu):
+choco install protobuf       # kalau ada Chocolatey
+winget install protobuf      # kalau ada winget
+
+# Atau download manual:
+# https://github.com/protocolbuffers/protobuf/releases
+# Download protoc-xx.x-win64.zip, extract, tambah bin/ ke PATH
+
+# macOS:
+brew install protobuf
+
+# Ubuntu/Debian:
+sudo apt install protobuf-compiler</code></pre>
 </div>
 
 <div class="card">
