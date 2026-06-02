@@ -1,0 +1,8 @@
+#!/bin/bash
+# postinstall — runs after .pkg install
+chmod +x /usr/local/bin/moccipult
+
+echo ""
+echo "  ✅ Moccipult installed to /usr/local/bin/moccipult"
+echo "  Run: moccipult status"
+echo ""

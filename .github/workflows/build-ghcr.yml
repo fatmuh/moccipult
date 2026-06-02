@@ -245,10 +245,100 @@ jobs:
           if-no-files-found: error
 
   # ──────────────────────────────────────────────
-  # Job 4: Create GitHub Release
+  # Job 5: Build Installers (.exe / .deb / .pkg)
+  # ──────────────────────────────────────────────
+  build-installers:
+    needs: [auto-tag, build-cli]
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            installer: windows
+            artifact: moccipult-windows
+            binary: moccipult-windows.exe
+            output: moccipult-setup-${{ needs.auto-tag.outputs.version }}.exe
+          - os: ubuntu-latest
+            installer: linux
+            artifact: moccipult-linux
+            binary: moccipult-linux
+            output: moccipult_${{ needs.auto-tag.outputs.version }}_amd64.deb
+          - os: macos-latest
+            installer: macos
+            artifact: moccipult-macos
+            binary: moccipult-macos
+            output: moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64.pkg
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download CLI binary
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist
+
+      # ── Windows Installer (.exe with Inno Setup) ──
+      - name: Install Inno Setup (Windows)
+        if: matrix.installer == 'windows'
+        run: |
+          choco install innosetup --version=6.3.3 --no-progress -y
+        shell: pwsh
+
+      - name: Build Windows .exe installer
+        if: matrix.installer == 'windows'
+        run: |
+          mkdir -p installer/windows/bin
+          cp dist/${{ matrix.binary }} installer/windows/bin/moccipult.exe
+          echo "MIT License" > installer/windows/LICENSE.txt
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          & $iscc /DAppVersion="${{ needs.auto-tag.outputs.version }}" installer/windows/moccipult.iss
+        shell: pwsh
+
+      - name: Upload Windows installer
+        if: matrix.installer == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-windows
+          path: installer/windows/output/*.exe
+
+      # ── Linux Installer (.deb) ──
+      - name: Build Linux .deb installer
+        if: matrix.installer == 'linux'
+        run: |
+          chmod +x installer/linux/build-deb.sh
+          bash installer/linux/build-deb.sh "${{ needs.auto-tag.outputs.version }}" "dist/${{ matrix.binary }}"
+
+      - name: Upload Linux installer
+        if: matrix.installer == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-linux
+          path: installer/linux/output/*.deb
+
+      # ── macOS Installer (.pkg) ──
+      - name: Build macOS .pkg installer
+        if: matrix.installer == 'macos'
+        run: |
+          chmod +x installer/macos/build-pkg.sh
+          chmod +x installer/macos/scripts/postinstall
+          bash installer/macos/build-pkg.sh "${{ needs.auto-tag.outputs.version }}" "dist/${{ matrix.binary }}" "x86_64"
+
+      - name: Upload macOS installer
+        if: matrix.installer == 'macos'
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-macos
+          path: installer/macos/output/*.pkg
+
+  # ──────────────────────────────────────────────
+  # Job 6: Create GitHub Release
   # ──────────────────────────────────────────────
   release:
-    needs: [auto-tag, build-cli]
+    needs: [auto-tag, build-cli, build-installers]
     runs-on: ubuntu-latest
 
     steps:
@@ -262,6 +352,13 @@ jobs:
           pattern: moccipult-*
           merge-multiple: true
 
+      - name: Download installer artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: installers
+          pattern: installer-*
+          merge-multiple: true
+
       - name: List files
         run: find dist -type f -ls
 
@@ -273,7 +370,14 @@ jobs:
           body: |
             ## 🚀 Moccipult ${{ needs.auto-tag.outputs.version }}
 
-            ### Downloads
+            ### Installers (recommended)
+            | Platform | File |
+            |----------|------|
+            | Windows Setup | `moccipult-setup-${{ needs.auto-tag.outputs.version }}.exe` |
+            | Linux DEB | `moccipult_${{ needs.auto-tag.outputs.version }}_amd64.deb` |
+            | macOS PKG | `moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64.pkg` |
+
+            ### Portable Binaries
             | Platform | File |
             |----------|------|
             | Windows x64 | `moccipult-windows.exe` |
@@ -298,6 +402,9 @@ jobs:
             dist/moccipult-linux
             dist/moccipult-macos
             dist/moccipult-macos-arm
+            installers/*.exe
+            installers/*.deb
+            installers/*.pkg
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
