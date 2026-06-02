@@ -974,16 +974,80 @@ moccipult status
 <!-- PAGE: SETUP SHOREBIRD CLI                -->
 <!-- ═══════════════════════════════════════ -->
 <div class="page" id="page-setup">
-<h2>Setup Shorebird CLI + Moccipult</h2>
-<p class="subtitle">Fork Shorebird CLI open-source, patch supaya ngomong ke server Moccipult kamu. 100% gratis, tanpa batasan.</p>
+<h2>Setup Shorebird CLI</h2>
+<p class="subtitle">Patch Shorebird CLI open-source supaya ngomong ke server Moccipult kamu. 100% gratis, tanpa batasan.</p>
 
 <div class="alert alert-success">
-<span class="alert-icon">✅</span>
-<div><strong>Kenapa cara ini?</strong> Shorebird CLI open-source (MIT/Apache). Kita cuma ganti server URL-nya. Engine + compiler tetap resmi dari Shorebird. Server kita handle distribusi patch — jadi <strong>gratis & unlimited</strong>.</div>
+<span class="alert-icon">💡</span>
+<div><strong>Konsep:</strong> Shorebird CLI itu open-source (Dart). Kita clone source code-nya, ganti semua URL <code class="inline-code">api.shorebird.dev</code> → <code class="inline-code">patches.kamudomain.com</code>, lalu compile ulang. Engine, compiler, dan patch algorithm tetap pakai yang resmi dari Shorebird.</div>
 </div>
 
-<h3>Prerequisites</h3>
-<p>Sebelum mulai, pastikan ini sudah terinstall:</p>
+<!-- ── GAMBARAN BESAR ── -->
+<h3>Gambaran Besar</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  SEBELUM (Shorebird resmi):                                     │
+│  ─────────────────────────────                                  │
+│  shorebird CLI ──▶ api.shorebird.dev ──▶ Shorebird Cloud (bayar)│
+│                                                                 │
+│                                                                 │
+│  SESUDAH (Moccipult):                                           │
+│  ──────────────────                                              │
+│  shorebird CLI ──▶ patches.yourdomain.com ──▶ Server kamu       │
+│     (di-patch)         ↑                         ├── Express API│
+│                   patch_repos.py                ├── SQLite DB   │
+│                                                  └── S3 Storage │
+│                                                                 │
+│  Yang berubah: HANYA URL server                                 │
+│  Yang TETAP SAMA:                                               │
+│    ✅ Shorebird engine (modified Flutter engine)                │
+│    ✅ AOT snapshot compiler & patch generation                  │
+│    ✅ Native updater code di Android/iOS                        │
+│    ✅ Dart/Flutter toolchain                                    │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<!-- ── PILIH CARA ── -->
+<h3>Pilih Cara Setup</h3>
+
+<div class="card-grid">
+<div class="card" style="border-color:rgba(74,222,128,.3)">
+<div class="card-header">
+<div class="card-icon" style="background:var(--green-bg)">⚡</div>
+<h4>Cara 1: Satu Command (Recommended)</h4>
+</div>
+<p>Pakai <code class="inline-code">moccipult setup-shorebird</code> — otomatis clone, patch, build, install. Cukup jalankan satu command.</p>
+<pre><code>moccipult setup-shorebird</code></pre>
+</div>
+
+<div class="card" style="border-color:rgba(34,211,238,.3)">
+<div class="card-header">
+<div class="card-icon" style="background:var(--cyan-bg)">📦</div>
+<h4>Cara 2: Shell Script</h4>
+</div>
+<p>Pakai script <code class="inline-code">setup-shorebird.sh</code> dari repo. cocok kalau belum install moccipult CLI.</p>
+<pre><code>git clone https://github.com/fatmuh/moccipult.git
+cd moccipult
+./setup-shorebird.sh https://patches.yourdomain.com</code></pre>
+</div>
+
+<div class="card" style="border-color:rgba(251,146,60,.3)">
+<div class="card-header">
+<div class="card-icon" style="background:var(--orange-bg)">🔧</div>
+<h4>Cara 3: Manual Step-by-Step</h4>
+</div>
+<p>Clone, patch, build manual. Bagus kalau mau ngerti detail prosesnya atau troubleshooting.</p>
+<p>Lihat <a href="#" onclick="document.querySelector('[data-page=setup-manual]').click();return false">Manual Setup ↓</a></p>
+</div>
+</div>
+
+<!-- ── CARA 1: AUTO ── -->
+<h3>Cara 1 Detail: <code class="inline-code">moccipult setup-shorebird</code></h3>
+
+<div class="step">
+<div class="step-num">0</div>
+<div class="step-content">
+<h4>Pastikan prerequisites sudah terinstall</h4>
+<p>Command ini butuh beberapa tools. Kalau belum ada, command akan error dan bilang apa yang kurang.</p>
 <table class="params">
 <tr><th>Tool</th><th>Install</th><th>Cek</th></tr>
 <tr><td>Git</td><td><a href="https://git-scm.com" target="_blank">git-scm.com</a></td><td><code class="inline-code">git --version</code></td></tr>
@@ -991,65 +1055,138 @@ moccipult status
 <tr><td>Flutter SDK</td><td><a href="https://flutter.dev" target="_blank">flutter.dev</a></td><td><code class="inline-code">flutter --version</code></td></tr>
 <tr><td>Protobuf</td><td><code class="inline-code">apt install protobuf-compiler</code> / <code class="inline-code">brew install protobuf</code></td><td><code class="inline-code">protoc --version</code></td></tr>
 <tr><td>Python 3</td><td>sudah ada biasanya</td><td><code class="inline-code">python3 --version</code></td></tr>
-<tr><td>Android NDK</td><td>Via Android Studio → SDK Manager</td><td><code class="inline-code">echo $ANDROID_NDK_HOME</code></td></tr>
 </table>
-
-<h3>Cara Cepat: Setup Script</h3>
-<p>Kita udah nyiapin script otomatis yang handle semuanya:</p>
-
-<h4>Linux / macOS</h4>
-<pre><code># Clone repo Moccipult
- git clone https://github.com/fatmuh/moccipult.git
- cd moccipult
-
-# Jalankan setup script
- chmod +x setup-shorebird.sh
- ./setup-shorebird.sh https://patches.yourdomain.com</code></pre>
-
-<h4>Windows</h4>
-<pre><code># Clone repo Moccipult
- git clone https://github.com/fatmuh/moccipult.git
- cd moccipult
-
-# Jalankan setup script
- setup-shorebird.bat https://patches.yourdomain.com</code></pre>
-
-<p>Script akan otomatis: clone repo → patch URL → build CLI → siap pakai.</p>
-
-<h3>Manual Step-by-Step</h3>
-<p>Kalau mau ngerti prosesnya atau script error:</p>
+</div>
+</div>
 
 <div class="step">
 <div class="step-num">1</div>
 <div class="step-content">
-<h4>Clone Shorebird repos</h4>
-<pre><code>mkdir shorebird-workspace && cd shorebird-workspace
-
-# Clone CLI
- git clone --depth 1 https://github.com/shorebirdtech/shorebird.git
-
-# Clone updater
- git clone --depth 1 https://github.com/shorebirdtech/updater.git</code></pre>
+<h4>Set server URL di moccipult</h4>
+<pre><code>moccipult config server https://patches.yourdomain.com</code></pre>
 </div>
 </div>
 
 <div class="step">
 <div class="step-num">2</div>
 <div class="step-content">
-<h4>Patch semua URL ke server kamu</h4>
-<pre><code># Dari root repo moccipult
- python patch_repos.py \
-   --shorebird-path ./shorebird-workspace/shorebird \
-   --updater-path ./shorebird-workspace/updater \
-   --target-url https://patches.yourdomain.com \
-   --dry-run      # preview dulu
+<h4>Jalankan setup</h4>
+<pre><code>moccipult setup-shorebird
 
-# Kalau sudah yakin, tanpa --dry-run
- python patch_repos.py \
-   --shorebird-path ./shorebird-workspace/shorebird \
-   --updater-path ./shorebird-workspace/updater \
-   --target-url https://patches.yourdomain.com</code></pre>
-<p>Script akan scan semua file dan mengganti <code class="inline-code">api.shorebird.dev</code>, <code class="inline-code">api.shorebird.cloud</code>, dll ke URL server kamu.</p>
+# Output:
+# 🔧 Shorebird CLI Setup
+#
+#   Target server: https://patches.yourdomain.com
+#   Workspace: ~/.moccipult/shorebird-workspace
+#
+# ✅ Prerequisites OK
+# ✅ Shorebird CLI cloned
+# ✅ Shorebird updater cloned
+# ✅ URLs patched to https://patches.yourdomain.com
+# ✅ Updater built
+# ✅ Shorebird CLI built
+#
+# ✅ Shorebird CLI installed!
+#   Binary: ~/.moccipult/bin/shorebird
+#   Server: https://patches.yourdomain.com</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">3</div>
+<div class="step-content">
+<h4>Test</h4>
+<pre><code># Buka terminal BARU (supaya PATH ke-load)
+shorebird --version</code></pre>
+</div>
+</div>
+
+<div class="alert alert-info">
+<span class="alert-icon">ℹ️</span>
+<div><strong>Opsi tambahan:</strong><br>
+<code class="inline-code">moccipult setup-shorebird --skip-build</code> — clone & patch saja, tanpa build<br>
+<code class="inline-code">moccipult setup-shorebird --shorebird-path /custom/path</code> — pilih lokasi workspace
+</div>
+</div>
+
+<!-- ── CARA 2: SCRIPT ── -->
+<h3>Cara 2 Detail: Shell Script</h3>
+
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>Clone repo Moccipult</h4>
+<pre><code>git clone https://github.com/fatmuh/moccipult.git
+cd moccipult</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>Jalankan script sesuai OS</h4>
+<pre><code># Linux / macOS:
+chmod +x setup-shorebird.sh
+./setup-shorebird.sh https://patches.yourdomain.com
+
+# Windows:
+setup-shorebird.bat https://patches.yourdomain.com</code></pre>
+<p>Script otomatis: cek prerequisites → clone repo → patch URL → build CLI → test.</p>
+</div>
+</div>
+
+<!-- ── CARA 3: MANUAL ── -->
+<h3 id="manual-setup">Cara 3 Detail: Manual Step-by-Step</h3>
+<p>Untuk yang mau ngerti prosesnya atau troubleshooting kalau auto-setup gagal.</p>
+
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>Buat workspace & clone repo Shorebird</h4>
+<pre><code># Buat folder workspace
+mkdir -p ~/shorebird-workspace
+cd ~/shorebird-workspace
+
+# Clone Shorebird CLI (Dart)
+git clone --depth 1 https://github.com/shorebirdtech/shorebird.git
+
+# Clone Shorebird updater (Rust)
+git clone --depth 1 https://github.com/shorebirdtech/updater.git</code></pre>
+<div class="alert alert-info">
+<span class="alert-icon">💡</span>
+<div><code class="inline-code">--depth 1</code> = clone cuma commit terakhir, lebih cepat. Repo shorebird lumayan besar.</div>
+</div>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>Patch semua URL ke server Moccipult</h4>
+<p>Script <code class="inline-code">patch_repos.py</code> akan scan semua file di repo shorebird dan mengganti URL Shorebird ke URL server kamu.</p>
+<pre><code># Dari root repo moccipult (atau path ke patch_repos.py)
+python3 patch_repos.py \
+  --shorebird-path ~/shorebird-workspace/shorebird \
+  --updater-path ~/shorebird-workspace/updater \
+  --target-url https://patches.yourdomain.com \
+  --dry-run
+
+# --dry-run = preview dulu, tidak ubah file
+# Kalau sudah yakin, jalankan tanpa --dry-run:
+python3 patch_repos.py \
+  --shorebird-path ~/shorebird-workspace/shorebird \
+  --updater-path ~/shorebird-workspace/updater \
+  --target-url https://patches.yourdomain.com</code></pre>
+<p>URL yang di-replace:</p>
+<table class="params">
+<tr><th>URL Asli</th><th>Di-replace ke</th></tr>
+<tr><td><code>api.shorebird.dev</code></td><td rowspan="6">Server Moccipult kamu</td></tr>
+<tr><td><code>api.shorebird.cloud</code></td></tr>
+<tr><td><code>shorebird.cloud</code></td></tr>
+<tr><td><code>console.shorebird.dev</code></td></tr>
+<tr><td><code>console.shorebird.cloud</code></td></tr>
+<tr><td><code>storage.googleapis.com/shorebird</code></td></tr>
+</table>
 </div>
 </div>
 
@@ -1057,33 +1194,37 @@ moccipult status
 <div class="step-num">3</div>
 <div class="step-content">
 <h4>Build updater (Rust)</h4>
-<pre><code>cd shorebird-workspace/updater
-cargo build --release</code></pre>
+<pre><code>cd ~/shorebird-workspace/updater
+cargo build --release
+
+# Bisa lama 5-15 menit pertama kali (compile Rust)</code></pre>
 </div>
 </div>
 
 <div class="step">
 <div class="step-num">4</div>
 <div class="step-content">
-<h4>Build Shorebird CLI</h4>
-<pre><code>cd shorebird-workspace/shorebird
+<h4>Build Shorebird CLI (Dart)</h4>
+<pre><code>cd ~/shorebird-workspace/shorebird
 
 # Install dependencies
 dart pub get
 
-# Compile ke binary
-dart compile exe bin/shorebird.dart -o shorebird   # Linux/Mac
-dart compile exe bin/shorebird.dart -o shorebird.exe  # Windows</code></pre>
+# Compile ke native binary
+dart compile exe bin/shorebird.dart -o shorebird       # Linux/macOS
+dart compile exe bin/shorebird.dart -o shorebird.exe   # Windows</code></pre>
 </div>
 </div>
 
 <div class="step">
 <div class="step-num">5</div>
 <div class="step-content">
-<h4>Test koneksi</h4>
+<h4>Test</h4>
 <pre><code>./shorebird --version
 
-# Login (skip kalau server kamu tanpa auth)
+# Kalau keluar versi, berarti CLI jalan normal.
+# CLI sekarang ngomong ke server Moccipult, bukan shorebird.dev.</n
+# (Opsional) Login — skip kalau server kamu tanpa auth
 ./shorebird login</code></pre>
 </div>
 </div>
@@ -1091,37 +1232,112 @@ dart compile exe bin/shorebird.dart -o shorebird.exe  # Windows</code></pre>
 <div class="step">
 <div class="step-num">6</div>
 <div class="step-content">
-<h4>Done! 🎉</h4>
-<p>CLI Shorebird sekarang ngomong ke server Moccipult kamu, bukan shorebird.dev.</p>
+<h4>Tambah ke PATH (supaya bisa diakses dari mana aja)</h4>
+<pre><code># Linux/macOS — tambah ke ~/.bashrc atau ~/.zshrc:
+echo 'export PATH="$HOME/shorebird-workspace/shorebird:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# Windows — tambah ke PATH via System Environment Variables,
+# atau copy shorebird.exe ke folder yang sudah di PATH.</code></pre>
 </div>
 </div>
 
-<h3>Arsitektur Setelah Setup</h3>
-<pre><code>SEBELUM (Shorebird resmi):
-═══════════════════════════
- shorebird CLI → api.shorebird.dev → Shorebird Cloud (bayar)
+<!-- ── UPDATE SHOREBIRD KE VERSI BARU ── -->
+<h3>Update Shorebird ke Versi Baru</h3>
+<p>Kalau Shorebird release versi baru dan kamu mau update:</p>
 
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>Pull versi terbaru</h4>
+<pre><code>cd ~/shorebird-workspace/shorebird
+git pull --rebase
 
-SESUDAH (Moccipult):
-═════════════════════
- shorebird CLI → patches.yourdomain.com → Server kamu (GRATIS)
-                 ↑                          ├── Express API
-                 Di-patch oleh              ├── SQLite DB
-                 patch_repos.py             └── IDCloudHost S3
-
-
-Yang berubah: HANYA URL server
-Yang TETAP SAMA:
-  ✅ Shorebird engine (modified Flutter engine)
-  ✅ AOT snapshot compiler
-  ✅ Patch generation algorithm
-  ✅ Native updater code
-  ✅ Dart/Flutter toolchain</code></pre>
-
-<div class="alert alert-warning">
-<span class="alert-icon">⚠️</span>
-<div><strong>Kalau Shorebird update versi baru:</strong> Cukup <code class="inline-code">git pull</code> di repo shorebird, lalu jalankan <code class="inline-code">patch_repos.py</code> lagi. Build ulang CLI. Selesai.</div>
+cd ~/shorebird-workspace/updater
+git pull --rebase</code></pre>
 </div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>Patch ulang URL</h4>
+<pre><code>python3 patch_repos.py \
+  --shorebird-path ~/shorebird-workspace/shorebird \
+  --updater-path ~/shorebird-workspace/updater \
+  --target-url https://patches.yourdomain.com</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">3</div>
+<div class="step-content">
+<h4>Build ulang</h4>
+<pre><code>cd ~/shorebird-workspace/updater && cargo build --release
+cd ~/shorebird-workspace/shorebird && dart pub get && dart compile exe bin/shorebird.dart -o shorebird</code></pre>
+</div>
+</div>
+
+<!-- ── TROUBLESHOOTING ── -->
+<h3>Troubleshooting</h3>
+
+<div class="card">
+<h4>❌ <code>rustc: command not found</code></h4>
+<p>Install Rust: <code class="inline-code">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></p>
+<p>Windows: download dari <a href="https://rustup.rs" target="_blank">rustup.rs</a></p>
+</div>
+
+<div class="card">
+<h4>❌ <code>protoc: command not found</code></h4>
+<pre><code># Ubuntu/Debian:
+sudo apt install protobuf-compiler
+
+# macOS:
+brew install protobuf
+
+# Windows:
+choco install protobuf</code></pre>
+</div>
+
+<div class="card">
+<h4>❌ <code>dart: command not found</code></h4>
+<p>Dart sudah bundel dengan Flutter SDK. Pastikan <code class="inline-code">flutter --version</code> jalan, lalu:</p>
+<pre><code># Dart biasanya ada di:
+# Linux/macOS: ~/development/flutter/bin/dart
+# Windows: C:\flutter\bin\dart.bat
+
+# Pastikan Flutter/bin ada di PATH</code></pre>
+</div>
+
+<div class="card">
+<h4>❌ <code>cargo build</code> error / lama banget</h4>
+<p>Build Rust pertama kali bisa 5-15 menit. Kalau error:</p>
+<pre><code># Cek versi Rust minimal:
+rustc --version   # butuh >= 1.70
+
+# Update Rust:
+rustup update</code></pre>
+</div>
+
+<div class="card">
+<h4>❌ <code>shorebird --version</code> error setelah build</h4>
+<p>Cek apakah binary berhasil di-compile:</p>
+<pre><code>ls -la ~/shorebird-workspace/shorebird/shorebird
+
+# Kalau file tidak ada, compile ulang:
+cd ~/shorebird-workspace/shorebird
+dart compile exe bin/shorebird.dart -o shorebird 2>&1
+# ^ baca error message-nya</code></pre>
+</div>
+
+<div class="card">
+<h4>❌ Shorebird CLI jalan tapi masih nyasar ke shorebird.dev</h4>
+<p>Artinya patch URL belum ke-apply. Jalankan ulang <code class="inline-code">patch_repos.py</code> tanpa <code class="inline-code">--dry-run</code>, lalu rebuild CLI.</p>
+<pre><code># Cek apakah URL sudah terganti:
+grep -r "shorebird.dev" ~/shorebird-workspace/shorebird/lib/ | head -5
+# Kalau masih keluar hasil, berarti belum di-patch</code></pre>
+</div>
+
 </div>
 
 <!-- ═══════════════════════════════════════ -->
