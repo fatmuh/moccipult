@@ -21,6 +21,7 @@ const Conf = require("conf");
 const inquirer = require("inquirer");
 const fs = require("fs-extra");
 const path = require("path");
+const os = require("os");
 const FormData = require("form-data");
 const fetch = require("node-fetch");
 
@@ -432,7 +433,132 @@ patchesCmd
     }
   });
 
-// ─── INIT (Quick Setup) ────────────────────────────────────────────────────
+// ─── SETUP SHOREBIRD ─────────────────────────────────────────────────────────
+program
+  .command("setup-shorebird")
+  .description("Auto-setup Shorebird CLI — clone, patch URLs, build, install to PATH")
+  .option("--shorebird-path <path>", "Custom directory to store Shorebird workspace")
+  .option("--skip-build", "Skip building, just clone & patch")
+  .action(async (opts) => {
+    console.log(chalk.bold.cyan(BANNER));
+    console.log(chalk.bold("  🔧 Shorebird CLI Setup\n"));
+
+    const serverUrl = getServer();
+    console.log(chalk.dim(`  Target server: ${serverUrl}`));
+
+    const ws = opts.shorebirdPath || path.join(os.homedir(), ".moccipult", "shorebird-workspace");
+    console.log(chalk.dim(`  Workspace: ${ws}`));
+    console.log();
+
+    const { execSync } = require("child_process");
+
+    const run = (cmd, label) => {
+      try {
+        execSync(cmd, { stdio: "pipe", cwd: ws, shell: true });
+        ok(label);
+      } catch (err) {
+        fail(label + " — " + err.stderr?.toString().split("\n").slice(-3).join("").trim());
+        throw err;
+      }
+    };
+
+    const ok = (msg) => console.log(chalk.green("  ✅ " + msg));
+    const fail = (msg) => console.log(chalk.red("  ❌ " + msg));
+
+    try {
+      // Check prerequisites
+      const spinner0 = ora("Checking prerequisites...").start();
+      const missing = [];
+      try { execSync("git --version", { stdio: "pipe" }); } catch { missing.push("git"); }
+      try { execSync("rustc --version", { stdio: "pipe" }); } catch { missing.push("rust (rustup.rs)"); }
+      try { execSync("dart --version", { stdio: "pipe" }); } catch { missing.push("dart (Flutter SDK)"); }
+      try { execSync("protoc --version", { stdio: "pipe" }); } catch { missing.push("protobuf"); }
+
+      if (missing.length > 0) {
+        spinner0.fail(chalk.red(`Missing: ${missing.join(", ")}`));
+        console.log(chalk.dim("  Install them first, then run this command again."));
+        return;
+      }
+      spinner0.succeed("Prerequisites OK");
+
+      // Create workspace
+      fs.ensureDirSync(ws);
+
+      // Clone shorebird
+      const sbDir = path.join(ws, "shorebird");
+      const upDir = path.join(ws, "updater");
+
+      const spinner1 = ora("Cloning Shorebird CLI...").start();
+      if (!fs.existsSync(sbDir)) {
+        execSync("git clone --depth 1 https://github.com/shorebirdtech/shorebird.git", { stdio: "pipe", cwd: ws });
+        spinner1.succeed("Shorebird CLI cloned");
+      } else {
+        spinner1.succeed("Shorebird CLI already exists");
+      }
+
+      const spinner2 = ora("Cloning Shorebird updater...").start();
+      if (!fs.existsSync(upDir)) {
+        execSync("git clone --depth 1 https://github.com/shorebirdtech/updater.git", { stdio: "pipe", cwd: ws });
+        spinner2.succeed("Shorebird updater cloned");
+      } else {
+        spinner2.succeed("Shorebird updater already exists");
+      }
+
+      // Patch URLs
+      const spinner3 = ora(`Patching URLs to ${serverUrl}...`).start();
+      const patchScript = path.join(__dirname, "..", "..", "patch_repos.py");
+      const pythonCmd = process.platform === "win32" ? "python" : "python3";
+      execSync(
+        `${pythonCmd} "${patchScript}" --shorebird-path "${sbDir}" --updater-path "${upDir}" --target-url "${serverUrl}"`,
+        { stdio: "pipe" }
+      );
+      spinner3.succeed(`URLs patched to ${serverUrl}`);
+
+      if (opts.skipBuild) {
+        console.log(chalk.yellow("\n  ⚠️  --skip-build: skipping build. Build manually with:"));
+        console.log(chalk.dim(`    cd ${sbDir} && dart compile exe bin/shorebird.dart -o shorebird`));
+        return;
+      }
+
+      // Build updater
+      const spinner4 = ora("Building updater (Rust)...").start();
+      execSync("cargo build --release", { stdio: "pipe", cwd: upDir });
+      spinner4.succeed("Updater built");
+
+      // Build CLI
+      const spinner5 = ora("Building Shorebird CLI...").start();
+      execSync("dart pub get", { stdio: "pipe", cwd: sbDir });
+      const ext = process.platform === "win32" ? ".exe" : "";
+      const sbBin = path.join(sbDir, `shorebird${ext}`);
+      execSync(`dart compile exe bin/shorebird.dart -o "${sbBin}"`, { stdio: "pipe", cwd: sbDir });
+      spinner5.succeed("Shorebird CLI built");
+
+      // Install to moccipult bin
+      const moccBin = path.join(os.homedir(), ".moccipult", "bin");
+      fs.ensureDirSync(moccBin);
+      const dest = path.join(moccBin, `shorebird${ext}`);
+      fs.copyFileSync(sbBin, dest);
+      fs.chmodSync(dest, 0o755);
+
+      console.log();
+      console.log(chalk.bold.green("  ✅ Shorebird CLI installed!"));
+      console.log(chalk.dim(`  Binary: ${dest}`));
+      console.log(chalk.dim(`  Server: ${serverUrl}`));
+      console.log();
+      console.log(chalk.yellow("  Langkah selanjutnya:"));
+      console.log(chalk.white("  1. Buka terminal BARU (reload PATH)"));
+      console.log(chalk.white("  2. cd /path/to/flutter/app"));
+      console.log(chalk.white("  3. shorebird login"));
+      console.log(chalk.white("  4. shorebird release android"));
+      console.log(chalk.white("  5. Fix bug, lalu: shorebird patch android"));
+      console.log();
+
+    } catch (err) {
+      console.error(chalk.red("\n  ❌ Setup gagal:"), err.message?.split("\n").slice(-3).join("\n"));
+      console.error(chalk.dim("  Cek error di atas. Mungkin ada prerequisite yang belum terinstall."));
+    }
+  });
+
 program
   .command("init")
   .description("Interactive quick setup — register app + create release")
