@@ -4,944 +4,681 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Moccipult — Dokumentasi</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#0f1117;--surface:#161822;--surface2:#1c1f2e;--border:#2a2d3e;
---primary:#6c63ff;--primary-light:#8b83ff;--primary-bg:rgba(108,99,255,.1);
---green:#4ade80;--green-bg:rgba(74,222,128,.1);
---orange:#fb923c;--orange-bg:rgba(251,146,60,.1);
---red:#f87171;--red-bg:rgba(248,113,113,.1);
---cyan:#22d3ee;--cyan-bg:rgba(34,211,238,.1);
---text:#e2e8f0;--text-dim:#94a3b8;--text-muted:#64748b;
---font-mono:'JetBrains Mono',monospace;--font-sans:'Inter',system-ui,sans-serif;
---radius:12px;
+:root {
+  --bg: #ffffff;
+  --sidebar-bg: #f8f9fb;
+  --sidebar-border: #e5e7eb;
+  --surface: #f9fafb;
+  --surface2: #f3f4f6;
+  --border: #e5e7eb;
+  --primary: #4f46e5;
+  --primary-light: #6366f1;
+  --primary-bg: #eef2ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --orange: #d97706;
+  --orange-bg: #fffbeb;
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --cyan: #0891b2;
+  --cyan-bg: #ecfeff;
+  --text: #111827;
+  --text-dim: #4b5563;
+  --text-muted: #9ca3af;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-body{background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.7;overflow-x:hidden}
-a{color:var(--primary-light);text-decoration:none}
-a:hover{text-decoration:underline}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-sans); color: var(--text); background: var(--bg); line-height: 1.7; }
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-/* ─── Layout ─── */
-.layout{display:flex;min-height:100vh}
-.sidebar{width:280px;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;padding:24px 0}
-.main{margin-left:280px;flex:1;max-width:900px;padding:40px 48px;margin-right:auto}
+/* LAYOUT */
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--sidebar-border);
+  position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100;
+  padding: 0 0 24px;
+}
+.main { margin-left: 260px; flex: 1; padding: 40px 56px; max-width: 860px; }
 
-/* ─── Sidebar ─── */
-.logo{padding:0 24px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
-.logo h1{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#fff}
-.logo span{color:var(--primary)}
-.logo p{font-size:12px;color:var(--text-muted);margin-top:4px}
-.nav-section{padding:8px 0}
-.nav-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:8px 24px 4px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:8px 24px;cursor:pointer;font-size:14px;color:var(--text-dim);transition:all .15s}
-.nav-item:hover{background:var(--surface2);color:var(--text)}
-.nav-item.active{color:var(--primary-light);background:var(--primary-bg);border-right:2px solid var(--primary)}
-.nav-item .icon{width:18px;text-align:center;font-size:15px}
+/* SIDEBAR */
+.sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
+.sidebar-logo h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.sidebar-logo h1 span { color: var(--primary); }
+.sidebar-logo p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.nav-section { padding: 12px 0 4px; }
+.nav-section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); padding: 4px 20px 6px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 7px 20px; cursor: pointer;
+  font-size: 13.5px; color: var(--text-dim); transition: all .12s; border-left: 3px solid transparent;
+}
+.nav-item:hover { background: var(--surface); color: var(--text); }
+.nav-item.active { color: var(--primary); background: var(--primary-bg); border-left-color: var(--primary); font-weight: 500; }
+.nav-item .icon { width: 18px; text-align: center; font-size: 14px; }
 
-/* ─── Content ─── */
-.page{display:none}
-.page.active{display:block}
-h2{font-size:28px;font-weight:800;margin-bottom:8px;letter-spacing:-0.5px}
-h3{font-size:20px;font-weight:700;margin:32px 0 12px}
-h4{font-size:16px;font-weight:600;margin:24px 0 8px}
-p{margin:12px 0;color:var(--text-dim)}
-.subtitle{color:var(--text-muted);font-size:16px;margin-bottom:32px}
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+h3 { font-size: 18px; font-weight: 700; margin: 32px 0 12px; color: var(--text); }
+h4 { font-size: 15px; font-weight: 600; margin: 20px 0 6px; }
+p { margin: 10px 0; color: var(--text-dim); font-size: 14.5px; }
+.subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 28px; }
 
-/* ─── Code ─── */
-pre{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;overflow-x:auto;margin:16px 0;font-family:var(--font-mono);font-size:13.5px;line-height:1.6}
-code{font-family:var(--font-mono);font-size:13.5px}
-.inline-code{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:13px;color:var(--cyan)}
-.code-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.code-label .lang{background:var(--primary-bg);color:var(--primary-light);padding:2px 8px;border-radius:4px}
+/* CODE */
+pre {
+  background: #1e1e2e; color: #cdd6f4; border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px 20px; overflow-x: auto; margin: 12px 0; font-family: var(--font-mono);
+  font-size: 13px; line-height: 1.6;
+}
+code { font-family: var(--font-mono); font-size: 13px; }
+.ic { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 7px; font-size: 12.5px; color: var(--cyan); }
 
-/* ─── Cards ─── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:16px 0}
-.card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
-.card h4{margin:0}
-.card p{margin:8px 0 0;font-size:14px}
+/* TABLE */
+.tbl { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
+.tbl th { text-align: left; padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); font-weight: 600; color: var(--text-dim); font-size: 12px; }
+.tbl td { padding: 8px 12px; border: 1px solid var(--border); color: var(--text-dim); }
+.tbl code { color: var(--primary); font-size: 12.5px; }
 
-.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+/* CARDS */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 14px 0; }
+.card h4 { margin: 0 0 6px; font-size: 14px; }
+.card p { font-size: 13.5px; margin: 4px 0 0; }
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
 
-/* ─── Steps ─── */
-.step{display:flex;gap:16px;margin:20px 0}
-.step-num{width:32px;height:32px;border-radius:50%;background:var(--primary-bg);color:var(--primary-light);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;margin-top:2px}
-.step-content{flex:1}
-.step-content h4{margin:0 0 4px}
-.step-content p{margin:4px 0;font-size:14px}
+/* STEPS */
+.step { display: flex; gap: 14px; margin: 18px 0; }
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--primary-bg); color: var(--primary);
+  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+  flex-shrink: 0; margin-top: 2px;
+}
+.step-content { flex: 1; }
+.step-content h4 { margin: 0 0 4px; font-size: 14.5px; }
+.step-content p { font-size: 13.5px; }
 
-/* ─── Endpoint table ─── */
-.endpoint{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin:16px 0;overflow:hidden}
-.endpoint-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer}
-.endpoint-header .method{font-family:var(--font-mono);font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;text-transform:uppercase}
-.method-post{background:var(--green-bg);color:var(--green)}
-.method-get{background:var(--cyan-bg);color:var(--cyan)}
-.method-patch{background:var(--orange-bg);color:var(--orange)}
-.endpoint-header .path{font-family:var(--font-mono);font-size:14px;color:var(--text)}
-.endpoint-header .desc{margin-left:auto;font-size:13px;color:var(--text-muted)}
-.endpoint-body{padding:20px;display:none}
-.endpoint.open .endpoint-body{display:block}
-.endpoint.open{border-color:var(--primary)}
+/* ALERTS */
+.alert { border-radius: 8px; padding: 14px 18px; margin: 14px 0; font-size: 13.5px; display: flex; gap: 10px; align-items: flex-start; border: 1px solid; }
+.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-info { background: var(--cyan-bg); border-color: #a5f3fc; color: #0e7490; }
+.alert-warning { background: var(--orange-bg); border-color: #fde68a; color: #92400e; }
+.alert-danger { background: var(--red-bg); border-color: #fecaca; color: #991b1b; }
+.alert-success { background: var(--green-bg); border-color: #a7f3d0; color: #065f46; }
 
-/* ─── Badges ─── */
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
-.badge-required{background:var(--red-bg);color:var(--red)}
-.badge-optional{background:var(--cyan-bg);color:var(--cyan)}
+/* BADGES */
+.badge { display: inline-flex; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+.badge-r { background: var(--red-bg); color: var(--red); }
+.badge-o { background: var(--cyan-bg); color: var(--cyan); }
 
-/* ─── Params table ─── */
-.params{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
-.params th{text-align:left;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);font-weight:600;color:var(--text-dim)}
-.params td{padding:8px 12px;border:1px solid var(--border);color:var(--text-dim)}
-.params code{color:var(--cyan)}
+/* ENDPOINTS */
+.ep { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin: 14px 0; overflow: hidden; }
+.ep-h { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.ep-h .m { font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+.m-post { background: var(--green-bg); color: var(--green); }
+.m-get { background: var(--cyan-bg); color: var(--cyan); }
+.m-patch { background: var(--orange-bg); color: var(--orange); }
+.ep-h .p { font-family: var(--font-mono); font-size: 13px; color: var(--text); }
+.ep-h .d { margin-left: auto; font-size: 12px; color: var(--text-muted); }
+.ep-b { padding: 16px; display: none; }
+.ep.open .ep-b { display: block; }
+.ep.open { border-color: var(--primary); }
 
-/* ─── Alert ─── */
-.alert{border-radius:var(--radius);padding:16px 20px;margin:16px 0;font-size:14px;display:flex;gap:12px;align-items:flex-start}
-.alert-icon{font-size:18px;flex-shrink:0;margin-top:1px}
-.alert-info{background:var(--cyan-bg);border:1px solid rgba(34,211,238,.2);color:var(--cyan)}
-.alert-warning{background:var(--orange-bg);border:1px solid rgba(251,146,60,.2);color:var(--orange)}
-.alert-danger{background:var(--red-bg);border:1px solid rgba(248,113,113,.2);color:var(--red)}
-.alert-success{background:var(--green-bg);border:1px solid rgba(74,222,128,.2);color:var(--green)}
+/* FLOW */
+.flow { display: flex; align-items: center; gap: 6px; margin: 14px 0; flex-wrap: wrap; }
+.flow-step { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 12.5px; font-family: var(--font-mono); }
+.flow-arrow { color: var(--primary); font-size: 16px; }
 
-/* ─── Copy button ─── */
-.code-block{position:relative}
-.copy-btn{position:absolute;top:12px;right:12px;background:var(--border);border:none;color:var(--text-muted);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:var(--font-sans)}
-.copy-btn:hover{color:var(--text);background:var(--surface)}
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-/* ─── Flow diagram ─── */
-.flow{display:flex;align-items:center;gap:8px;margin:16px 0;flex-wrap:wrap}
-.flow-step{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:13px;font-family:var(--font-mono)}
-.flow-arrow{color:var(--primary);font-size:18px}
-
-/* ─── Scrollbar ─── */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-
-/* ─── Responsive ─── */
-@media(max-width:768px){
-.sidebar{display:none}
-.main{margin-left:0;padding:24px 16px}
-.card-grid{grid-template-columns:1fr}
+/* MOBILE */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 20px 16px; }
+  .card-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 <div class="layout">
-<!-- ═══════ SIDEBAR ═══════ -->
+
+<!-- SIDEBAR -->
 <aside class="sidebar">
-<div class="logo">
-<h1>mocc<span>ipult</span></h1>
-<p>Self-hosted Code Push v1.0</p>
-</div>
+  <div class="sidebar-logo">
+    <h1>mocc<span>ipult</span></h1>
+    <p>Self-hosted Code Push</p>
+  </div>
 
-<div class="nav-section-title">Memulai</div>
-<div class="nav-item active" data-page="intro"><span class="icon">🏠</span> Pengenalan</div>
-<div class="nav-item" data-page="quickstart"><span class="icon">🚀</span> Install & Quick Start</div>
-<div class="nav-item" data-page="app-id"><span class="icon">🔑</span> Dapatkan App ID</div>
-<div class="nav-item" data-page="flutter"><span class="icon">💙</span> Integrasi Flutter</div>
-</div>
+  <div class="nav-section">
+    <div class="nav-section-title">Memulai</div>
+    <div class="nav-item active" data-page="intro"><span class="icon">🏠</span> Pengenalan</div>
+    <div class="nav-item" data-page="quickstart"><span class="icon">🚀</span> Install & Quick Start</div>
+    <div class="nav-item" data-page="app-id"><span class="icon">🔑</span> Dapatkan App ID</div>
+    <div class="nav-item" data-page="flutter"><span class="icon">💙</span> Integrasi Flutter</div>
+  </div>
 
-<div class="nav-section">
-<div class="nav-section-title">Referensi</div>
-<div class="nav-item" data-page="api"><span class="icon">📡</span> API Endpoints</div>
-<div class="nav-item" data-page="cli"><span class="icon">⌨️</span> CLI Commands</div>
-</div>
+  <div class="nav-section">
+    <div class="nav-section-title">Referensi</div>
+    <div class="nav-item" data-page="api"><span class="icon">📡</span> API Endpoints</div>
+    <div class="nav-item" data-page="cli"><span class="icon">⌨️</span> CLI Commands</div>
+  </div>
 
-<div class="nav-section">
-<div class="nav-section-title">Setup</div>
-<div class="nav-item" data-page="setup"><span class="icon">🔧</span> Setup Shorebird CLI</div>
-<div class="nav-item" data-page="workflow"><span class="icon">🔄</span> Workflow Harian</div>
-</div>
+  <div class="nav-section">
+    <div class="nav-section-title">Setup</div>
+    <div class="nav-item" data-page="setup"><span class="icon">🔧</span> Setup Shorebird CLI</div>
+    <div class="nav-item" data-page="workflow"><span class="icon">🔄</span> Workflow Harian</div>
+  </div>
 
-<div class="nav-section">
-<div class="nav-section-title">Deploy ke Store</div>
-<div class="nav-item" data-page="playstore"><span class="icon">🤖</span> Play Store</div>
-<div class="nav-item" data-page="appstore"><span class="icon">🍎</span> App Store</div>
-</div>
+  <div class="nav-section">
+    <div class="nav-section-title">Deploy</div>
+    <div class="nav-item" data-page="playstore"><span class="icon">🤖</span> Play Store</div>
+    <div class="nav-item" data-page="appstore"><span class="icon">🍎</span> App Store</div>
+  </div>
 </aside>
 
-<!-- ═══════ MAIN CONTENT ═══════ -->
+<!-- MAIN -->
 <main class="main">
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PAGE: PENGENALAN                        -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: PENGENALAN -->
+<!-- ═══════════════════════════════════════════════ -->
 <div class="page active" id="page-intro">
 <h2>Apa itu Moccipult?</h2>
-<p class="subtitle">Self-hosted code push untuk aplikasi Flutter — push update langsung ke HP user tanpa lewat Play Store.</p>
+<p class="subtitle">Self-hosted code push untuk Flutter — push update langsung ke HP user tanpa lewat Play Store.</p>
 
 <div class="card-grid">
-<div class="card">
-<div class="card-header">
-<div class="card-icon" style="background:var(--green-bg)">⚡</div>
-<h4>Cepat</h4>
-</div>
-<p>Push perbaikan bug dalam hitungan detik, bukan hari. Update otomatis saat user buka app.</p>
-</div>
-<div class="card">
-<div class="card-header">
-<div class="card-icon" style="background:var(--primary-bg)">🔒</div>
-<h4>Self-Hosted</h4>
-</div>
-<p>Data tetap di server lo. Ga lewat pihak ketiga. Full kontrol.</p>
-</div>
-<div class="card">
-<div class="card-header">
-<div class="card-icon" style="background:var(--orange-bg)">📦</div>
-<h4>Ringan</h4>
-</div>
-<p>Patch cuma mengandung bagian yang berubah, ukuran ratusan KB bukan puluhan MB.</p>
-</div>
-<div class="card">
-<div class="card-header">
-<div class="card-icon" style="background:var(--cyan-bg)">💰</div>
-<h4>Gratis</h4>
-</div>
-<p>Tanpa biaya subscription. Server Express + SQLite + S3 storage.</p>
-</div>
+  <div class="card">
+    <h4>⚡ Cepat</h4>
+    <p>Push perbaikan bug dalam hitungan detik. Update otomatis saat user buka app.</p>
+  </div>
+  <div class="card">
+    <h4>🔒 Self-Hosted</h4>
+    <p>Data tetap di server lo. Ga lewat pihak ketiga. Full kontrol.</p>
+  </div>
+  <div class="card">
+    <h4>📦 Ringan</h4>
+    <p>Patch cuma mengandung bagian yang berubah — ratusan KB, bukan puluhan MB.</p>
+  </div>
+  <div class="card">
+    <h4>💰 Gratis</h4>
+    <p>Tanpa biaya subscription. Server Express + SQLite + S3.</p>
+  </div>
 </div>
 
 <h3>Bagaimana Cara Kerjanya?</h3>
-
 <div class="flow">
-<div class="flow-step">🐛 Bug ditemukan</div>
-<span class="flow-arrow">→</span>
-<div class="flow-step">Fix kode</div>
-<span class="flow-arrow">→</span>
-<div class="flow-step">Upload patch</div>
-<span class="flow-arrow">→</span>
-<div class="flow-step">User buka app</div>
-<span class="flow-arrow">→</span>
-<div class="flow-step">Auto download patch</div>
-<span class="flow-arrow">→</span>
-<div class="flow-step">✅ Bug hilang</div>
+  <div class="flow-step">🐛 Bug ditemukan</div><span class="flow-arrow">→</span>
+  <div class="flow-step">Fix kode</div><span class="flow-arrow">→</span>
+  <div class="flow-step">Upload patch</div><span class="flow-arrow">→</span>
+  <div class="flow-step">User buka app</div><span class="flow-arrow">→</span>
+  <div class="flow-step">Auto download</div><span class="flow-arrow">→</span>
+  <div class="flow-step">✅ Bug hilang</div>
 </div>
 
 <h3>Perbandingan</h3>
-<table class="params">
-<tr><th></th><th>Tanpa Code Push</th><th>Dengan Moccipult</th></tr>
-<tr><td>Upload</td><td>Play Store / App Store</td><td>Server sendiri</td></tr>
-<tr><td>Review</td><td>2–7 hari</td><td>Tanpa review</td></tr>
-<tr><td>Ukuran update</td><td>20–100 MB (full APK)</td><td>500 KB – 5 MB (patch)</td></tr>
-<tr><td>User harus</td><td>Download dari Store</td><td>Nggak usah apa-apa</td></tr>
-<tr><td>Waktu</td><td>Hari–minggu</td><td>Detik–menit</td></tr>
+<table class="tbl">
+  <tr><th></th><th>Tanpa Code Push</th><th>Dengan Moccipult</th></tr>
+  <tr><td>Upload</td><td>Play Store / App Store</td><td>Server sendiri</td></tr>
+  <tr><td>Review</td><td>2–7 hari</td><td>Tanpa review</td></tr>
+  <tr><td>Ukuran update</td><td>20–100 MB</td><td>500 KB – 5 MB</td></tr>
+  <tr><td>User harus</td><td>Download dari Store</td><td>Nggak usah apa-apa</td></tr>
+  <tr><td>Waktu</td><td>Hari–minggu</td><td>Detik–menit</td></tr>
 </table>
 
 <h3>Arsitektur</h3>
-<pre><code>┌─────────────────┐      ┌──────────────────┐      ┌──────────────┐
-│  Developer      │      │  Moccipult       │      │  Flutter App │
-│  (CLI / CI)     │      │  Server          │      │  (HP User)   │
-│                 │      │                  │      │              │
-│  moccipult      │─────▶│  /api/v1/apps    │      │              │
-│  patches upload │      │  /api/v1/patches │◀─────│  check patch │
-│                 │      │  /downloads/...  │─────▶│  download    │
-│                 │      │       │          │      │  apply       │
-│                 │      │       ▼          │      │              │
-│                 │      │  Object Storage  │      │              │
-│                 │      │  (S3 / IDCloud)  │      │              │
-└─────────────────┘      └──────────────────┘      └──────────────┘</code></pre>
+<pre><code>┌─────────────────┐     ┌──────────────────┐     ┌──────────────┐
+│  Developer      │     │  Moccipult       │     │  Flutter App │
+│  (CLI / CI)     │     │  Server          │     │  (HP User)   │
+│                 │     │                  │     │              │
+│  moccipult      │────▶│  /api/v1/apps    │     │              │
+│  patches upload │     │  /api/v1/patches │◀────│  check patch │
+│                 │     │  /downloads/...  │────▶│  download    │
+│                 │     │       │          │     │  apply       │
+│                 │     │       ▼          │     │              │
+│                 │     │  Object Storage  │     │              │
+│                 │     │  (S3 / Local)    │     │              │
+└─────────────────┘     └──────────────────┘     └──────────────┘</code></pre>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PAGE: QUICK START                       -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: QUICK START -->
+<!-- ═══════════════════════════════════════════════ -->
 <div class="page" id="page-quickstart">
-<h2>Quick Start</h2>
+<h2>Install & Quick Start</h2>
 <p class="subtitle">Dari nol sampai bisa push patch dalam 5 menit.</p>
 
-<h3>Step 1: Install Moccipult</h3>
+<h3>Step 1: Install Moccipult CLI</h3>
+<p>Download dari <a href="https://github.com/fatmuh/moccipult/releases" target="_blank">GitHub Releases</a> sesuai OS kamu.</p>
 
 <div class="card-grid">
-<div class="card" style="border-color:rgba(74,222,128,.3)">
-<div class="card-header">
-<div class="card-icon" style="background:var(--green-bg)">📥</div>
-<h4>Installer (Recommended)</h4>
-</div>
-<p>Download installer dari <a href="https://github.com/fatmuh/moccipult/releases">GitHub Releases</a>. Otomatis install + tambah ke PATH.</p>
-<table class="params" style="margin-top:12px">
-<tr><td>🪟 Windows</td><td><code>moccipult-setup-x.x.x.exe</code></td></tr>
-<tr><td>🐧 Linux</td><td><code>moccipult_x.x.x_amd64.deb</code></td></tr>
-<tr><td>🍎 macOS</td><td><code>moccipult-x.x.x-macos.pkg</code></td></tr>
-</table>
-<pre><code># Windows: double-click moccipult-setup.exe, next-next-finish
+  <div class="card">
+    <h4>📥 Installer (Recommended)</h4>
+    <table class="tbl">
+      <tr><td>🪟 Windows</td><td><code>moccipult-setup-x.x.x.exe</code></td></tr>
+      <tr><td>🐧 Linux</td><td><code>moccipult_x.x.x_amd64.deb</code></td></tr>
+      <tr><td>🍎 macOS</td><td><code>moccipult-x.x.x-macos.pkg</code></td></tr>
+    </table>
+<pre><code># Windows: double-click .exe, next-next-finish
 
 # Linux:
 sudo dpkg -i moccipult_*.deb
 
 # macOS:
-open moccipult-*.pkg   # ikuti installer wizard</code></pre>
-</div>
-<div class="card" style="border-color:rgba(34,211,238,.3)">
-<div class="card-header">
-<div class="card-icon" style="background:var(--cyan-bg)">📦</div>
-<h4>Portable Binary</h4>
-</div>
-<p>Download binary langsung, taruh mana aja. Tanpa install wizard.</p>
-<table class="params" style="margin-top:12px">
-<tr><td>🪟 Windows</td><td><code>moccipult-windows.exe</code></td></tr>
-<tr><td>🐧 Linux</td><td><code>moccipult-linux</code></td></tr>
-<tr><td>🍎 macOS</td><td><code>moccipult-macos</code></td></tr>
-<tr><td>🍎 macOS ARM</td><td><code>moccipult-macos-arm</code></td></tr>
-</table>
+open moccipult-*.pkg</code></pre>
+  </div>
+  <div class="card">
+    <h4>📦 Portable Binary</h4>
+    <table class="tbl">
+      <tr><td>🪟 Windows</td><td><code>moccipult-windows.exe</code></td></tr>
+      <tr><td>🐧 Linux</td><td><code>moccipult-linux</code></td></tr>
+      <tr><td>🍎 macOS</td><td><code>moccipult-macos</code></td></tr>
+    </table>
 <pre><code># Linux/macOS:
 chmod +x moccipult-*
 ./moccipult-* status
 
 # Windows:
 moccipult-windows.exe status</code></pre>
-</div>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Set Server URL</h4>
-<p>Hubungkan CLI ke server Moccipult.</p>
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>Set Server URL</h4>
 <pre><code>moccipult config server https://patches.yourdomain.com</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">3</div>
-<div class="step-content">
-<h4>Buat App & Release</h4>
-<p>Registrasi app baru dan buat versi pertama. Ikuti prompt interaktif.</p>
-<pre><code>moccipult init
-
-📱 App name: MyApp
-📦 Package name: com.example.myapp
-📱 Platform: android
-🏷️ Version: 1.0.0
-📢 Channel: stable
-
-✅ Setup complete!
-   App ID: abc-123-def
-   Release ID: xyz-789-uvw</code></pre>
-</div>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">4</div>
-<div class="step-content">
-<h4>Catat App ID dan Release ID</h4>
-<p>Simpan kedua ID ini. <code class="inline-code">App ID</code> dipakai di Flutter, <code class="inline-code">Release ID</code> dipakai saat upload patch.</p>
-<div class="alert alert-warning">
-<span class="alert-icon">⚠️</span>
-<div>File <code>.moccipult.json</code> otomatis dibuat di current directory berisi kedua ID ini.</div>
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>Buat App & Release</h4>
+<pre><code>moccipult init</code></pre>
+    <p>Ikuti prompt interaktif — isi nama app, package, platform, versi, channel.</p>
+  </div>
 </div>
-</div>
+
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <h4>Catat App ID dan Release ID</h4>
+    <p><code class="ic">App ID</code> → dipakai di Flutter. <code class="ic">Release ID</code> → dipakai saat upload patch.</p>
+    <p>File <code class="ic">.moccipult.json</code> otomatis dibuat di current directory.</p>
+  </div>
 </div>
 
 <h3>Upload Patch</h3>
 
 <div class="step">
-<div class="step-num">5</div>
-<div class="step-content">
-<h4>Fix bug di kode Flutter</h4>
-<p>Edit kode seperti biasa, fix bug yang mau di-patch.</p>
-</div>
+  <div class="step-num">5</div>
+  <div class="step-content">
+    <h4>Fix bug di kode Flutter</h4>
+    <p>Edit kode seperti biasa.</p>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">6</div>
-<div class="step-content">
-<h4>Build & Upload Patch</h4>
-<pre><code># Upload patch file
-moccipult patches upload -r &lt;RELEASE_ID&gt; -f patch.bin
+  <div class="step-num">6</div>
+  <div class="step-content">
+    <h4>Upload patch file</h4>
+<pre><code>moccipult patches upload -r &lt;RELEASE_ID&gt; -f patch.bin
 
-# Atau kalau ada .moccipult.json, cukup:
+# Atau kalau ada .moccipult.json:
 moccipult patches upload -f patch.bin</code></pre>
-</div>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">7</div>
-<div class="step-content">
-<h4>Selesai! 🎉</h4>
-<p>User akan otomatis menerima patch saat membuka app.</p>
-<pre><code>moccipult patches check -a &lt;APP_ID&gt; -v 1.0.0
-
-✔ Patch available!
-  Patch Number: #1
-  Download URL: https://...
-  File Size:    2.5 KB</code></pre>
-</div>
+  <div class="step-num">7</div>
+  <div class="step-content">
+    <h4>Selesai! 🎉</h4>
+    <p>User otomatis menerima patch saat buka app.</p>
+  </div>
 </div>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PAGE: DAPATKAN APP ID                    -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: APP ID -->
+<!-- ═══════════════════════════════════════════════ -->
 <div class="page" id="page-app-id">
 <h2>Dapatkan App ID & Release ID</h2>
-<p class="subtitle">Langkah demi langkah cara mendapatkan App ID dan Release ID untuk integrasi ke Flutter app.</p>
+<p class="subtitle">Cara mendapatkan ID yang dibutuhkan untuk integrasi.</p>
 
 <div class="alert alert-info">
-<span class="alert-icon">ℹ️</span>
-<div><strong>App ID</strong> dipakai di Flutter (<code class="inline-code">main.dart</code>), <strong>Release ID</strong> dipakai saat upload patch via CLI.</div>
+  <span class="alert-icon">ℹ️</span>
+  <div><strong>App ID</strong> dipakai di Flutter (<code class="ic">main.dart</code>), <strong>Release ID</strong> dipakai saat upload patch via CLI.</div>
 </div>
 
-<h3>Cara 1: Menggunakan CLI (Direkomendasikan)</h3>
+<h3>Cara 1: Menggunakan CLI (Recommended)</h3>
 
 <div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Download CLI</h4>
-<p>Download <code class="inline-code">moccipult</code> dari <a href="https://github.com/fatmuh/moccipult/releases" target="_blank">GitHub Releases</a> sesuai OS kamu.</p>
-<pre><code># Contoh di Windows
-# Download moccipult-windows.exe, taruh di folder project kamu</code></pre>
-</div>
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>Set server URL</h4>
+<pre><code>moccipult config server https://patches.yourdomain.com</code></pre>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Set server URL</h4>
-<p>Hubungkan CLI ke server Moccipult kamu. Minta URL server ke lead/devops tim kamu.</p>
-<pre><code>moccipult config server https://patches.yourdomain.com
-
-# Output:
-# ✅ Config set: server = https://patches.yourdomain.com</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">3</div>
-<div class="step-content">
-<h4>Cek koneksi ke server</h4>
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>Cek koneksi</h4>
 <pre><code>moccipult status
-
-# Output kalau berhasil:
 # ✅ Server: https://patches.yourdomain.com
-# Service: Moccipult Patch Server
-# Version: 1.0.0</code></pre>
-<div class="alert alert-warning">
-<span class="alert-icon">⚠️</span>
-<div>Kalau muncul <strong>❌ Server (offline)</strong>, cek apakah URL server sudah benar dan server sedang jalan.</div>
-</div>
-</div>
+# Service: Moccipult Patch Server</code></pre>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">4</div>
-<div class="step-content">
-<h4>Jalankan <code class="inline-code">moccipult init</code></h4>
-<p>Ini akan membuat App baru dan Release baru secara interaktif.</p>
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>Jalankan <code class="ic">moccipult init</code></h4>
 <pre><code>moccipult init
 
-# CLI akan menanyakan:
-📱 App name: MyApp                 ← isi nama app kamu
-📦 Package name: com.example.app  ← isi package name Flutter kamu
-📱 Platform: android              ← pilih android atau ios
-🏷️  Version: 1.0.0                ← sesuaikan dengan versi di pubspec.yaml
-📢 Channel: stable                ← pilih stable atau beta</code></pre>
-</div>
+📱 App name: MyApp
+📦 Package name: com.example.app
+📱 Platform: android
+🏷️  Version: 1.0.0
+📢 Channel: stable
+
+✅ Setup complete!
+   App ID:      a1b2c3d4-e5f6-7890-abcd-ef1234567890
+   Release ID:  x1y2z3w4-v5u6-7890-abcd-ef1234567890</code></pre>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">5</div>
-<div class="step-content">
-<h4>Simpan App ID dan Release ID</h4>
-<p>Setelah init selesai, akan muncul output seperti ini:</p>
-<pre><code>✅ Setup complete!
-
-  Summary:
-  ─────────────────────────────────
-  App ID:      a1b2c3d4-e5f6-7890-abcd-ef1234567890
-  Release ID:  x1y2z3w4-v5u6-7890-abcd-ef1234567890
-  Config:      .moccipult.json
-
-  Next steps:
-  1. Build your Flutter app
-  2. Generate a patch file
-  3. Run: moccipult patches upload -r x1y2z3w4-v5u6-7890-abcd-ef1234567890 -f patch.bin</code></pre>
-
-<div class="alert alert-success">
-<span class="alert-icon">✅</span>
-<div>
-<p><strong>Catat kedua ID ini!</strong></p>
-<ul style="margin-top:8px;padding-left:20px">
-<li><strong>App ID</strong> → dipakai di <code class="inline-code">main.dart</code> Flutter</li>
-<li><strong>Release ID</strong> → dipakai saat upload patch via CLI</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">6</div>
-<div class="step-content">
-<h4>File .moccipult.json otomatis dibuat</h4>
-<p>CLI otomatis membuat file ini di current directory:</p>
-<pre><code>// .moccipult.json
-{
-  "appId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "releaseId": "x1y2z3w4-v5u6-7890-abcd-ef1234567890",
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <h4>File <code class="ic">.moccipult.json</code> otomatis dibuat</h4>
+<pre><code>{
+  "appId": "a1b2c3d4-e5f6-...",
+  "releaseId": "x1y2z3w4-v5u6-...",
   "appName": "MyApp",
   "version": "1.0.0",
-  "platform": "android",
-  "channel": "stable"
+  "platform": "android"
 }</code></pre>
-<p>Jadi kamu tidak perlu menghafal ID-nya. Cukup buka file ini kalau lupa.</p>
-</div>
+  </div>
 </div>
 
-<h3>Cara 2: Menggunakan API Langsung</h3>
-<p>Kalau kamu tidak bisa pakai CLI (misal di CI/CD), bisa pakai API langsung.</p>
+<h3>Cara 2: API Langsung</h3>
+<p>Untuk CI/CD atau automation.</p>
 
 <div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Buat App</h4>
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>Buat App</h4>
 <pre><code>curl -X POST https://patches.yourdomain.com/api/v1/apps \
   -H "Content-Type: application/json" \
-  -d '{
-    "name": "MyApp",
-    "package_name": "com.example.app",
-    "platform": "android"
-  }'
-
-// Response:
-{
-  "ok": true,
-  "app": {
-    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",  ← ini App ID
-    "name": "MyApp",
-    "package_name": "com.example.app",
-    "platform": "android"
-  }
-}</code></pre>
-</div>
+  -d '{"name":"MyApp","package_name":"com.example.app","platform":"android"}'</code></pre>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Buat Release</h4>
-<p>Gunakan <strong>App ID</strong> dari langkah sebelumnya.</p>
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>Buat Release</h4>
 <pre><code>curl -X POST https://patches.yourdomain.com/api/v1/releases \
   -H "Content-Type: application/json" \
-  -d '{
-    "app_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    "version": "1.0.0",
-    "platform": "android",
-    "channel": "stable"
-  }'
-
-// Response:
-{
-  "ok": true,
-  "release": {
-    "id": "x1y2z3w4-v5u6-7890-abcd-ef1234567890",  ← ini Release ID
-    "version": "1.0.0",
-    "platform": "android",
-    "channel": "stable"
-  }
-}</code></pre>
-</div>
+  -d '{"app_id":"APP_ID_DARI_STEP_1","version":"1.0.0","platform":"android"}'</code></pre>
+  </div>
 </div>
 
 <h3>Cara 3: Cek ID yang Sudah Ada</h3>
-<p>Kalau app sudah pernah didaftarkan tapi kamu lupa ID-nya:</p>
+<pre><code># List semua app
+moccipult apps list
 
-<div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>List semua app</h4>
-<pre><code>moccipult apps list
+# List releases dari app tertentu
+moccipult releases list -a &lt;APP_ID&gt;</code></pre>
 
-# Output:
-✔ Found 2 app(s)
-
-  Apps:
-  ────────────────────────────────────────────────────────
-  a1b2c3d4...  MyApp                      android     2024-01-01
-  f9e8d7c6...  OtherApp                   android     2024-01-02
-  ────────────────────────────────────────────────────────</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>List releases dari app tertentu</h4>
-<pre><code>moccipult releases list -a a1b2c3d4-e5f6-7890-abcd-ef1234567890
-
-# Output:
-✔ Found 2 release(s)
-
-  Releases:
-  ────────────────────────────────────────────────────────────────
-  x1y2z3w4...  v1.0.0       android     stable       2024-01-01
-  m5n6o7p8...  v1.1.0       android     stable       2024-02-01
-  ────────────────────────────────────────────────────────────────</code></pre>
-</div>
-</div>
-
-<h3>Yang Mana Dipakai di Mana?</h3>
-<table class="params">
-<tr><th>ID</th><th>Dipakai di</th><th>Contoh</th></tr>
-<tr><td><code>App ID</code></td><td><code>main.dart</code> Flutter</td><td><code>MoccipultUpdater(appId: 'a1b2c3d4-...')</code></td></tr>
-<tr><td><code>Release ID</code></td><td>CLI saat upload patch</td><td><code>moccipult patches upload -r x1y2z3w4-... -f patch.bin</code></td></tr>
-<tr><td><code>Patch ID</code></td><td>CLI saat disable/rollback</td><td><code>moccipult patches status p1q2r3-... disabled</code></td></tr>
+<h3>ID Dipakai di Mana?</h3>
+<table class="tbl">
+  <tr><th>ID</th><th>Dipakai di</th><th>Contoh</th></tr>
+  <tr><td><code>App ID</code></td><td>main.dart Flutter</td><td><code>MoccipultUpdater(appId: 'a1b2c3d4-...')</code></td></tr>
+  <tr><td><code>Release ID</code></td><td>CLI upload patch</td><td><code>moccipult patches upload -r x1y2z3w4-...</code></td></tr>
+  <tr><td><code>Patch ID</code></td><td>CLI disable/rollback</td><td><code>moccipult patches status ID disabled</code></td></tr>
 </table>
-
-<div class="alert alert-info">
-<span class="alert-icon">💡</span>
-<div><strong>Tips:</strong> Satu app bisa punya banyak release (misal v1.0.0, v1.1.0, v2.0.0). Setiap release punya patch-nya sendiri. Jadi kalau ada user yang masih pakai v1.0.0 dan ada yang sudah v1.1.0, keduanya bisa dapat patch yang berbeda.</div>
 </div>
 
-</div>
-
-<!-- ═══════════════════════════════════════ -->
-<!-- PAGE: FLUTTER INTEGRATION               -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: FLUTTER -->
+<!-- ═══════════════════════════════════════════════ -->
 <div class="page" id="page-flutter">
 <h2>Integrasi Flutter</h2>
-<p class="subtitle">Cara menggunakan Moccipult di project Flutter kamu.</p>
+<p class="subtitle">Tambahkan Moccipult ke project Flutter kamu.</p>
 
 <h3>1. Tambahkan Package</h3>
-<p>Edit <code class="inline-code">pubspec.yaml</code>:</p>
+<p>Edit <code class="ic">pubspec.yaml</code>:</p>
 <pre><code>dependencies:
   moccipult:
     git:
       url: https://github.com/fatmuh/moccipult.git
       path: flutter/moccipult</code></pre>
-<p>Lalu jalankan:</p>
 <pre><code>flutter pub get</code></pre>
 
-<h3>2. Tambahkan di <code class="inline-code">main.dart</code></h3>
-<p>Ganti <code class="inline-code">YOUR_APP_ID</code> dan <code class="inline-code">YOUR_SERVER_URL</code> dengan data dari <code class="inline-code">moccipult init</code>.</p>
+<h3>2. Tambahkan di main.dart</h3>
 <pre><code>import 'package:flutter/material.dart';
 import 'package:moccipult/moccipult.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ── Tambahkan kode ini ──────────────────
-  final updater = MoccipultUpdater(
+  // ── Tambahkan 3 baris ini ──
+  await MoccipultUpdater(
     serverUrl: 'https://patches.yourdomain.com',
-    appId: 'YOUR_APP_ID',     // dari moccipult init
-    platform: 'android',      // atau 'ios'
-    channel: 'stable',
-  );
-  await updater.checkAndApply();
-  // ── Selesai ──────────────────────────────
+    appId: 'YOUR_APP_ID',   // dari moccipult init
+    platform: 'android',    // atau 'ios'
+  ).checkAndApply();
+  // ── Selesai ──
 
   runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'My App',
-      home: const HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('My App')),
-      body: const Center(child: Text('App berjalan!')),
-    );
-  }
 }</code></pre>
 
-<h3>3. Advanced — Dengan Callbacks</h3>
-<p>Kamu bisa monitor proses update dengan callbacks:</p>
+<h3>3. Dengan Callbacks (Optional)</h3>
 <pre><code>final updater = MoccipultUpdater(
   serverUrl: 'https://patches.yourdomain.com',
   appId: 'YOUR_APP_ID',
 );
 
-// Ketika patch tersedia
 updater.onUpdateAvailable = (patch) {
-  print('🎉 Patch #${patch.patchNumber} tersedia!');
-  print('   Ukuran: ${patch.fileSize} bytes');
+  print('Patch #${patch.patchNumber} tersedia! (${patch.fileSize} bytes)');
 };
 
-// Progress download
 updater.onDownloadProgress = (downloaded, total) {
-  final percent = (downloaded / total * 100).toStringAsFixed(0);
-  print('📥 Download: $percent%');
+  print('Download: ${(downloaded / total * 100).toStringAsFixed(0)}%');
 };
 
-// Patch berhasil diterapkan
 updater.onPatchApplied = (patchNumber) {
-  print('✅ Patch #$patchNumber berhasil diterapkan!');
+  print('Patch #$patchNumber berhasil diterapkan!');
 };
 
-// Error (TIDAK akan crash app)
 updater.onError = (error) {
-  print('⚠️ Update error: $error');
+  print('Update error: $error');  // TIDAK akan crash app
 };
 
 await updater.checkAndApply();</code></pre>
 
-<h3>4. Cek Patch Number di UI</h3>
-<pre><code>FutureBuilder&lt;int&gt;(
-  future: MoccipultUpdater(
-    serverUrl: 'https://patches.yourdomain.com',
-    appId: 'YOUR_APP_ID',
-  ).getCurrentPatchNumber(),
-  builder: (context, snapshot) {
-    return Text('Patch version: #${snapshot.data ?? 0}');
-  },
-)</code></pre>
-
 <div class="alert alert-success">
-<span class="alert-icon">✅</span>
-<div><strong>Aman untuk production.</strong> Jika server down, app tetap jalan normal. Error hanya di-log, tidak crash.</div>
+  <span class="alert-icon">✅</span>
+  <div><strong>Aman untuk production.</strong> Jika server down, app tetap jalan normal. Error hanya di-log, tidak crash.</div>
 </div>
 
 <h3>Method Reference</h3>
-<table class="params">
-<tr><th>Method</th><th>Deskripsi</th><th>Return</th></tr>
-<tr><td><code>checkAndApply()</code></td><td>Cek + download + apply patch</td><td><code>Future&lt;void&gt;</code></td></tr>
-<tr><td><code>checkForPatch()</code></td><td>Cek saja, tanpa download</td><td><code>Future&lt;PatchResult&gt;</code></td></tr>
-<tr><td><code>downloadPatch()</code></td><td>Download patch file</td><td><code>Future&lt;File&gt;</code></td></tr>
-<tr><td><code>getCurrentPatchNumber()</code></td><td>Ambil patch number saat ini</td><td><code>Future&lt;int&gt;</code></td></tr>
-<tr><td><code>resetPatchNumber()</code></td><td>Reset ke 0 (untuk testing)</td><td><code>Future&lt;void&gt;</code></td></tr>
+<table class="tbl">
+  <tr><th>Method</th><th>Deskripsi</th><th>Return</th></tr>
+  <tr><td><code>checkAndApply()</code></td><td>Cek + download + apply patch</td><td><code>Future&lt;void&gt;</code></td></tr>
+  <tr><td><code>checkForPatch()</code></td><td>Cek saja, tanpa download</td><td><code>Future&lt;PatchResult&gt;</code></td></tr>
+  <tr><td><code>getCurrentPatchNumber()</code></td><td>Patch number saat ini</td><td><code>Future&lt;int&gt;</code></td></tr>
+  <tr><td><code>resetPatchNumber()</code></td><td>Reset ke 0 (testing)</td><td><code>Future&lt;void&gt;</code></td></tr>
 </table>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PAGE: API ENDPOINTS                      -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: API ENDPOINTS -->
+<!-- ═══════════════════════════════════════════════ -->
 <div class="page" id="page-api">
 <h2>API Endpoints</h2>
 <p class="subtitle">REST API untuk integrasi langsung tanpa CLI.</p>
 
 <div class="alert alert-info">
-<span class="alert-icon">ℹ️</span>
-<div>Base URL: <code class="inline-code" id="baseUrl">https://your-server.com</code></div>
+  <span class="alert-icon">ℹ️</span>
+  <div>Base URL: <code class="ic" id="baseUrl">https://your-server.com</code></div>
 </div>
 
-<!-- POST /api/v1/apps -->
-<div class="endpoint" onclick="this.classList.toggle('open')">
-<div class="endpoint-header">
-<span class="method method-post">POST</span>
-<span class="path">/api/v1/apps</span>
-<span class="desc">Registrasi app baru</span>
-</div>
-<div class="endpoint-body">
-<h4>Request Body</h4>
-<table class="params">
-<tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
-<tr><td><code>name</code></td><td>string</td><td><span class="badge badge-required">required</span> Nama app</td></tr>
-<tr><td><code>package_name</code></td><td>string</td><td><span class="badge badge-optional">optional</span> Package name (com.example.app)</td></tr>
-<tr><td><code>platform</code></td><td>string</td><td><span class="badge badge-optional">optional</span> android / ios (default: android)</td></tr>
-</table>
-<h4>Response <code>201</code></h4>
-<pre><code>{
-  "ok": true,
-  "app": {
-    "id": "uuid-here",
-    "name": "My App",
-    "package_name": "com.example.app",
-    "platform": "android"
-  }
-}</code></pre>
-</div>
+<div class="ep" onclick="this.classList.toggle('open')">
+  <div class="ep-h">
+    <span class="m m-post">POST</span>
+    <span class="p">/api/v1/apps</span>
+    <span class="d">Registrasi app baru</span>
+  </div>
+  <div class="ep-b">
+    <h4>Request Body</h4>
+    <table class="tbl">
+      <tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
+      <tr><td><code>name</code></td><td>string</td><td><span class="badge badge-r">required</span> Nama app</td></tr>
+      <tr><td><code>package_name</code></td><td>string</td><td><span class="badge badge-o">optional</span> Package name</td></tr>
+      <tr><td><code>platform</code></td><td>string</td><td><span class="badge badge-o">optional</span> android / ios</td></tr>
+    </table>
+    <h4>Response 201</h4>
+<pre><code>{ "ok": true, "app": { "id": "uuid", "name": "My App", "platform": "android" } }</code></pre>
+  </div>
 </div>
 
-<!-- GET /api/v1/apps -->
-<div class="endpoint" onclick="this.classList.toggle('open')">
-<div class="endpoint-header">
-<span class="method method-get">GET</span>
-<span class="path">/api/v1/apps</span>
-<span class="desc">List semua app</span>
-</div>
-<div class="endpoint-body">
-<h4>Response <code>200</code></h4>
-<pre><code>{
-  "ok": true,
-  "apps": [
-    { "id": "...", "name": "My App", "platform": "android" }
-  ]
-}</code></pre>
-</div>
+<div class="ep" onclick="this.classList.toggle('open')">
+  <div class="ep-h">
+    <span class="m m-get">GET</span>
+    <span class="p">/api/v1/apps</span>
+    <span class="d">List semua app</span>
+  </div>
+  <div class="ep-b">
+<pre><code>{ "ok": true, "apps": [{ "id": "...", "name": "My App", "platform": "android" }] }</code></pre>
+  </div>
 </div>
 
-<!-- POST /api/v1/releases -->
-<div class="endpoint" onclick="this.classList.toggle('open')">
-<div class="endpoint-header">
-<span class="method method-post">POST</span>
-<span class="path">/api/v1/releases</span>
-<span class="desc">Buat release baru</span>
-</div>
-<div class="endpoint-body">
-<h4>Request Body</h4>
-<table class="params">
-<tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
-<tr><td><code>app_id</code></td><td>string</td><td><span class="badge badge-required">required</span> App ID</td></tr>
-<tr><td><code>version</code></td><td>string</td><td><span class="badge badge-required">required</span> Versi (1.0.0)</td></tr>
-<tr><td><code>platform</code></td><td>string</td><td><span class="badge badge-optional">optional</span> android / ios</td></tr>
-<tr><td><code>channel</code></td><td>string</td><td><span class="badge badge-optional">optional</span> stable / beta</td></tr>
-</table>
-</div>
+<div class="ep" onclick="this.classList.toggle('open')">
+  <div class="ep-h">
+    <span class="m m-post">POST</span>
+    <span class="p">/api/v1/releases</span>
+    <span class="d">Buat release baru</span>
+  </div>
+  <div class="ep-b">
+    <table class="tbl">
+      <tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
+      <tr><td><code>app_id</code></td><td>string</td><td><span class="badge badge-r">required</span> App ID</td></tr>
+      <tr><td><code>version</code></td><td>string</td><td><span class="badge badge-r">required</span> Versi (1.0.0)</td></tr>
+      <tr><td><code>platform</code></td><td>string</td><td><span class="badge badge-o">optional</span></td></tr>
+      <tr><td><code>channel</code></td><td>string</td><td><span class="badge badge-o">optional</span> stable / beta</td></tr>
+    </table>
+  </div>
 </div>
 
-<!-- POST /api/v1/patches/upload -->
-<div class="endpoint" onclick="this.classList.toggle('open')">
-<div class="endpoint-header">
-<span class="method method-post">POST</span>
-<span class="path">/api/v1/patches/upload</span>
-<span class="desc">Upload patch binary</span>
-</div>
-<div class="endpoint-body">
-<h4>Request Body (multipart/form-data)</h4>
-<table class="params">
-<tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
-<tr><td><code>file</code></td><td>file</td><td><span class="badge badge-required">required</span> Patch file (.bin)</td></tr>
-<tr><td><code>release_id</code></td><td>string</td><td><span class="badge badge-required">required</span> Release ID</td></tr>
-</table>
-<h4>Response <code>201</code></h4>
+<div class="ep" onclick="this.classList.toggle('open')">
+  <div class="ep-h">
+    <span class="m m-post">POST</span>
+    <span class="p">/api/v1/patches/upload</span>
+    <span class="d">Upload patch binary</span>
+  </div>
+  <div class="ep-b">
+    <table class="tbl">
+      <tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
+      <tr><td><code>file</code></td><td>file</td><td><span class="badge badge-r">required</span> Patch file (.bin)</td></tr>
+      <tr><td><code>release_id</code></td><td>string</td><td><span class="badge badge-r">required</span> Release ID</td></tr>
+    </table>
+    <h4>Response 201</h4>
 <pre><code>{
   "ok": true,
   "patch": {
-    "id": "uuid",
-    "patch_number": 1,
+    "id": "uuid", "patch_number": 1,
     "download_url": "https://...",
-    "file_hash": "sha256...",
-    "file_size": 5120,
-    "status": "active"
+    "file_hash": "sha256...", "file_size": 5120
   }
 }</code></pre>
-</div>
+  </div>
 </div>
 
-<!-- POST /api/v1/patches/check -->
-<div class="endpoint" onclick="this.classList.toggle('open')">
-<div class="endpoint-header">
-<span class="method method-post">POST</span>
-<span class="path">/api/v1/patches/check</span>
-<span class="desc">Cek patch tersedia</span>
-</div>
-<div class="endpoint-body">
-<div class="alert alert-info">
-<span class="alert-icon">ℹ️</span>
-<div>Endpoint ini dipanggil oleh Flutter app secara otomatis.</div>
-</div>
-<h4>Request Body</h4>
-<table class="params">
-<tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
-<tr><td><code>app_id</code></td><td>string</td><td><span class="badge badge-required">required</span> App ID</td></tr>
-<tr><td><code>version</code></td><td>string</td><td><span class="badge badge-required">required</span> Versi app (1.0.0)</td></tr>
-<tr><td><code>current_patch_number</code></td><td>number</td><td><span class="badge badge-required">required</span> Patch number saat ini (0 jika belum)</td></tr>
-<tr><td><code>platform</code></td><td>string</td><td><span class="badge badge-optional">optional</span> android / ios</td></tr>
-<tr><td><code>channel</code></td><td>string</td><td><span class="badge badge-optional">optional</span> stable / beta</td></tr>
-</table>
-<h4>Response — Patch Tersedia</h4>
+<div class="ep" onclick="this.classList.toggle('open')">
+  <div class="ep-h">
+    <span class="m m-post">POST</span>
+    <span class="p">/api/v1/patches/check</span>
+    <span class="d">Cek patch tersedia</span>
+  </div>
+  <div class="ep-b">
+    <div class="alert alert-info"><span class="alert-icon">ℹ️</span><div>Endpoint ini dipanggil oleh Flutter app secara otomatis.</div></div>
+    <table class="tbl">
+      <tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
+      <tr><td><code>app_id</code></td><td>string</td><td><span class="badge badge-r">required</span></td></tr>
+      <tr><td><code>version</code></td><td>string</td><td><span class="badge badge-r">required</span> Versi app</td></tr>
+      <tr><td><code>current_patch_number</code></td><td>number</td><td><span class="badge badge-r">required</span> 0 jika belum ada</td></tr>
+      <tr><td><code>platform</code></td><td>string</td><td><span class="badge badge-o">optional</span></td></tr>
+      <tr><td><code>channel</code></td><td>string</td><td><span class="badge badge-o">optional</span></td></tr>
+    </table>
+    <h4>Response — Patch Tersedia</h4>
 <pre><code>{
-  "ok": true,
-  "patch_available": true,
-  "patch": {
-    "id": "uuid",
-    "patch_number": 2,
-    "download_url": "https://s3.../patch_2_xxx.bin",
-    "file_hash": "sha256...",
-    "file_size": 5120
-  }
+  "ok": true, "patch_available": true,
+  "patch": { "patch_number": 2, "download_url": "...", "file_size": 5120 }
 }</code></pre>
-<h4>Response — Sudah Up to Date</h4>
-<pre><code>{
-  "ok": true,
-  "patch_available": false,
-  "current_patch_number": 2,
-  "message": "Already up to date"
-}</code></pre>
+    <h4>Response — Sudah Up to Date</h4>
+<pre><code>{ "ok": true, "patch_available": false, "message": "Already up to date" }</code></pre>
+  </div>
+</div>
+
+<div class="ep" onclick="this.classList.toggle('open')">
+  <div class="ep-h">
+    <span class="m m-get">GET</span>
+    <span class="p">/api/v1/patches?release_id=</span>
+    <span class="d">List patches</span>
+  </div>
+  <div class="ep-b">
+    <table class="tbl">
+      <tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
+      <tr><td><code>release_id</code></td><td>string</td><td><span class="badge badge-r">required</span></td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="ep" onclick="this.classList.toggle('open')">
+  <div class="ep-h">
+    <span class="m m-patch">PATCH</span>
+    <span class="p">/api/v1/patches/:id/status</span>
+    <span class="d">Ubah status patch</span>
+  </div>
+  <div class="ep-b">
+    <table class="tbl">
+      <tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
+      <tr><td><code>status</code></td><td>string</td><td><span class="badge badge-r">required</span> active / disabled / rolled_back</td></tr>
+    </table>
+  </div>
 </div>
 </div>
 
-<!-- GET /api/v1/patches -->
-<div class="endpoint" onclick="this.classList.toggle('open')">
-<div class="endpoint-header">
-<span class="method method-get">GET</span>
-<span class="path">/api/v1/patches?release_id=</span>
-<span class="desc">List patches</span>
-</div>
-<div class="endpoint-body">
-<h4>Query Parameters</h4>
-<table class="params">
-<tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
-<tr><td><code>release_id</code></td><td>string</td><td><span class="badge badge-required">required</span> Release ID</td></tr>
-</table>
-</div>
-</div>
-
-<!-- PATCH /api/v1/patches/:id/status -->
-<div class="endpoint" onclick="this.classList.toggle('open')">
-<div class="endpoint-header">
-<span class="method method-patch">PATCH</span>
-<span class="path">/api/v1/patches/:id/status</span>
-<span class="desc">Ubah status patch</span>
-</div>
-<div class="endpoint-body">
-<h4>Request Body</h4>
-<table class="params">
-<tr><th>Parameter</th><th>Tipe</th><th>Deskripsi</th></tr>
-<tr><td><code>status</code></td><td>string</td><td><span class="badge badge-required">required</span> active / disabled / rolled_back</td></tr>
-</table>
-<pre><code>// Disable patch
-curl -X PATCH https://server/api/v1/patches/patch-id/status \
-  -H "Content-Type: application/json" \
-  -d '{"status": "disabled"}'</code></pre>
-</div>
-</div>
-</div>
-
-<!-- ═══════════════════════════════════════ -->
-<!-- PAGE: CLI COMMANDS                       -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: CLI COMMANDS -->
+<!-- ═══════════════════════════════════════════════ -->
 <div class="page" id="page-cli">
 <h2>CLI Commands</h2>
-<p class="subtitle">Referensi lengkap perintah CLI <code class="inline-code">moccipult</code>.</p>
+<p class="subtitle">Referensi perintah <code class="ic">moccipult</code>.</p>
 
 <h3>Config</h3>
-<pre><code># Set server URL
-moccipult config server https://patches.yourdomain.com
-
-# Lihat semua config
+<pre><code>moccipult config server https://patches.yourdomain.com
 moccipult config show
-
-# Ambil nilai tertentu
 moccipult config get server</code></pre>
 
 <h3>Init</h3>
-<p>Setup interaktif — buat app baru + release baru sekaligus.</p>
-<pre><code>moccipult init
-# Output:
-# 📱 App name: MyApp
-# 📦 Package: com.example.app
-# 📱 Platform: android
-# 🏷️  Version: 1.0.0
-# 📢 Channel: stable
-#
-# ✅ Setup complete!
-#    App ID: xxx
-#    Release ID: yyy</code></pre>
+<p>Setup interaktif — buat app + release sekaligus.</p>
+<pre><code>moccipult init</code></pre>
 
 <h3>Apps</h3>
-<pre><code># Buat app baru
-moccipult apps create -n "My App" -p com.example.app --platform android
-
-# List semua app
+<pre><code>moccipult apps create -n "My App" -p com.example.app --platform android
 moccipult apps list</code></pre>
 
 <h3>Releases</h3>
-<pre><code># Buat release baru
-moccipult releases create -a &lt;APP_ID&gt; -v 1.0.0 --platform android
-
-# List releases
+<pre><code>moccipult releases create -a &lt;APP_ID&gt; -v 1.0.0 --platform android
 moccipult releases list -a &lt;APP_ID&gt;</code></pre>
 
 <h3>Patches</h3>
@@ -951,580 +688,356 @@ moccipult patches upload -r &lt;RELEASE_ID&gt; -f patch.bin
 # Cek patch tersedia
 moccipult patches check -a &lt;APP_ID&gt; -v 1.0.0
 
-# List semua patch di release
+# List patches
 moccipult patches list -r &lt;RELEASE_ID&gt;
 
-# Disable patch
+# Disable / rollback
 moccipult patches status &lt;PATCH_ID&gt; disabled
-
-# Rollback patch
 moccipult patches status &lt;PATCH_ID&gt; rolled_back</code></pre>
 
 <h3>Status</h3>
-<pre><code># Cek server health + config lokal
-moccipult status
+<pre><code>moccipult status</code></pre>
 
-# Output:
-# ✅ Server: https://patches.yourdomain.com
-# 📱 App: MyApp (com.example.app)
-# Patch: #3</code></pre>
+<h3>Setup Shorebird</h3>
+<p>Clone, patch URL, dan build Shorebird CLI otomatis.</p>
+<pre><code>moccipult setup-shorebird
+moccipult setup-shorebird --skip-build
+moccipult setup-shorebird --shorebird-path /custom/path</code></pre>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PAGE: SETUP SHOREBIRD CLI                -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: SETUP SHOREBIRD CLI -->
+<!-- ═══════════════════════════════════════════════ -->
 <div class="page" id="page-setup">
 <h2>Setup Shorebird CLI</h2>
-<p class="subtitle">Patch Shorebird CLI open-source supaya ngomong ke server Moccipult kamu. 100% gratis, tanpa batasan.</p>
+<p class="subtitle">Patch Shorebird CLI supaya ngomong ke server Moccipult kamu. 100% gratis, tanpa batasan.</p>
 
 <div class="alert alert-success">
-<span class="alert-icon">💡</span>
-<div><strong>Konsep:</strong> Shorebird CLI itu open-source (Dart). Kita clone source code-nya, ganti semua URL <code class="inline-code">api.shorebird.dev</code> → <code class="inline-code">patches.kamudomain.com</code>, lalu compile ulang. Engine, compiler, dan patch algorithm tetap pakai yang resmi dari Shorebird.</div>
+  <span class="alert-icon">💡</span>
+  <div><strong>Konsep:</strong> Shorebird CLI itu open-source (Dart). Kita clone source-nya, ganti semua URL <code class="ic">api.shorebird.dev</code> jadi server Moccipult, lalu compile ulang. Engine & patch algorithm tetap resmi Shorebird.</div>
 </div>
 
-<!-- ── GAMBARAN BESAR ── -->
 <h3>Gambaran Besar</h3>
-<pre><code>┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
-│  SEBELUM (Shorebird resmi):                                     │
-│  ─────────────────────────────                                  │
-│  shorebird CLI ──▶ api.shorebird.dev ──▶ Shorebird Cloud (bayar)│
-│                                                                 │
-│                                                                 │
-│  SESUDAH (Moccipult):                                           │
-│  ──────────────────                                              │
-│  shorebird CLI ──▶ patches.yourdomain.com ──▶ Server kamu       │
-│     (di-patch)         ↑                         ├── Express API│
-│                   patch_repos.py                ├── SQLite DB   │
-│                                                  └── S3 Storage │
-│                                                                 │
-│  Yang berubah: HANYA URL server                                 │
-│  Yang TETAP SAMA:                                               │
-│    ✅ Shorebird engine (modified Flutter engine)                │
-│    ✅ AOT snapshot compiler & patch generation                  │
-│    ✅ Native updater code di Android/iOS                        │
-│    ✅ Dart/Flutter toolchain                                    │
-└─────────────────────────────────────────────────────────────────┘</code></pre>
+<pre><code>SEBELUM (Shorebird resmi):
+  shorebird CLI ──▶ api.shorebird.dev ──▶ Shorebird Cloud (bayar)
 
-<!-- ── PILIH CARA ── -->
+SESUDAH (Moccipult):
+  shorebird CLI ──▶ patches.yourdomain.com ──▶ Server kamu (GRATIS)
+     (di-patch)          ↑                      ├── Express API
+                     patch_repos.py             ├── SQLite DB
+                                                └── S3 Storage
+
+  Yang berubah: HANYA URL server
+  Yang TETAP SAMA:
+    ✅ Shorebird engine (modified Flutter engine)
+    ✅ AOT snapshot compiler & patch generation
+    ✅ Native updater code
+    ✅ Dart/Flutter toolchain</code></pre>
+
 <h3>Pilih Cara Setup</h3>
-
 <div class="card-grid">
-<div class="card" style="border-color:rgba(74,222,128,.3)">
-<div class="card-header">
-<div class="card-icon" style="background:var(--green-bg)">⚡</div>
-<h4>Cara 1: Satu Command (Recommended)</h4>
-</div>
-<p>Pakai <code class="inline-code">moccipult setup-shorebird</code> — otomatis clone, patch, build, install. Cukup jalankan satu command.</p>
+  <div class="card">
+    <h4>⚡ Cara 1: Satu Command</h4>
+    <p>Pakai <code class="ic">moccipult setup-shorebird</code> — auto clone, patch, build, install.</p>
 <pre><code>moccipult setup-shorebird</code></pre>
-</div>
-
-<div class="card" style="border-color:rgba(34,211,238,.3)">
-<div class="card-header">
-<div class="card-icon" style="background:var(--cyan-bg)">📦</div>
-<h4>Cara 2: Shell Script</h4>
-</div>
-<p>Pakai script <code class="inline-code">setup-shorebird.sh</code> dari repo. cocok kalau belum install moccipult CLI.</p>
+  </div>
+  <div class="card">
+    <h4>📦 Cara 2: Shell Script</h4>
+    <p>Dari repo Moccipult, tanpa install CLI dulu.</p>
 <pre><code>git clone https://github.com/fatmuh/moccipult.git
 cd moccipult
 ./setup-shorebird.sh https://patches.yourdomain.com</code></pre>
+  </div>
 </div>
 
-<div class="card" style="border-color:rgba(251,146,60,.3)">
-<div class="card-header">
-<div class="card-icon" style="background:var(--orange-bg)">🔧</div>
-<h4>Cara 3: Manual Step-by-Step</h4>
-</div>
-<p>Clone, patch, build manual. Bagus kalau mau ngerti detail prosesnya atau troubleshooting.</p>
-<p>Lihat <a href="#" onclick="document.querySelector('[data-page=setup-manual]').click();return false">Manual Setup ↓</a></p>
-</div>
-</div>
-
-<!-- ── CARA 1: AUTO ── -->
-<h3>Cara 1 Detail: <code class="inline-code">moccipult setup-shorebird</code></h3>
+<h3>Cara 1 Detail: <code class="ic">moccipult setup-shorebird</code></h3>
 
 <div class="step">
-<div class="step-num">0</div>
-<div class="step-content">
-<h4>Pastikan prerequisites sudah terinstall</h4>
-<p>Command ini butuh beberapa tools. Kalau belum ada, command akan error dan bilang apa yang kurang.</p>
-<table class="params">
-<tr><th>Tool</th><th>Install</th><th>Cek</th></tr>
-<tr><td>Git</td><td><a href="https://git-scm.com" target="_blank">git-scm.com</a></td><td><code class="inline-code">git --version</code></td></tr>
-<tr><td>Rust</td><td><a href="https://rustup.rs" target="_blank">rustup.rs</a></td><td><code class="inline-code">rustc --version</code></td></tr>
-<tr><td>Flutter SDK</td><td><a href="https://flutter.dev" target="_blank">flutter.dev</a></td><td><code class="inline-code">flutter --version</code></td></tr>
-<tr><td>Protobuf</td><td><code class="inline-code">apt install protobuf-compiler</code> / <code class="inline-code">brew install protobuf</code></td><td><code class="inline-code">protoc --version</code></td></tr>
-<tr><td>Python 3</td><td>sudah ada biasanya</td><td><code class="inline-code">python3 --version</code></td></tr>
-</table>
-</div>
+  <div class="step-num">0</div>
+  <div class="step-content">
+    <h4>Pastikan prerequisites sudah ada</h4>
+    <table class="tbl">
+      <tr><th>Tool</th><th>Install</th><th>Cek</th></tr>
+      <tr><td>Git</td><td><a href="https://git-scm.com" target="_blank">git-scm.com</a></td><td><code>git --version</code></td></tr>
+      <tr><td>Rust</td><td><a href="https://rustup.rs" target="_blank">rustup.rs</a></td><td><code>rustc --version</code></td></tr>
+      <tr><td>Flutter SDK</td><td><a href="https://flutter.dev" target="_blank">flutter.dev</a></td><td><code>flutter --version</code></td></tr>
+      <tr><td>Protobuf</td><td><code>apt install protobuf-compiler</code></td><td><code>protoc --version</code></td></tr>
+      <tr><td>Python 3</td><td>sudah ada biasanya</td><td><code>python3 --version</code></td></tr>
+    </table>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Set server URL di moccipult</h4>
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>Set server URL</h4>
 <pre><code>moccipult config server https://patches.yourdomain.com</code></pre>
-</div>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Jalankan setup</h4>
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>Jalankan setup</h4>
 <pre><code>moccipult setup-shorebird
 
 # Output:
-# 🔧 Shorebird CLI Setup
-#
-#   Target server: https://patches.yourdomain.com
-#   Workspace: ~/.moccipult/shorebird-workspace
-#
 # ✅ Prerequisites OK
 # ✅ Shorebird CLI cloned
 # ✅ Shorebird updater cloned
 # ✅ URLs patched to https://patches.yourdomain.com
 # ✅ Updater built
 # ✅ Shorebird CLI built
-#
 # ✅ Shorebird CLI installed!
-#   Binary: ~/.moccipult/bin/shorebird
-#   Server: https://patches.yourdomain.com</code></pre>
-</div>
+#   Binary: ~/.moccipult/bin/shorebird</code></pre>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">3</div>
-<div class="step-content">
-<h4>Test</h4>
-<pre><code># Buka terminal BARU (supaya PATH ke-load)
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>Test</h4>
+<pre><code># Buka terminal BARU (reload PATH)
 shorebird --version</code></pre>
-</div>
+  </div>
 </div>
 
 <div class="alert alert-info">
-<span class="alert-icon">ℹ️</span>
-<div><strong>Opsi tambahan:</strong><br>
-<code class="inline-code">moccipult setup-shorebird --skip-build</code> — clone & patch saja, tanpa build<br>
-<code class="inline-code">moccipult setup-shorebird --shorebird-path /custom/path</code> — pilih lokasi workspace
-</div>
+  <span class="alert-icon">ℹ️</span>
+  <div><strong>Opsi:</strong> <code class="ic">--skip-build</code> (clone & patch saja) · <code class="ic">--shorebird-path /path</code> (custom workspace)</div>
 </div>
 
-<!-- ── CARA 2: SCRIPT ── -->
-<h3>Cara 2 Detail: Shell Script</h3>
+<h3>Cara 3: Manual Step-by-Step</h3>
 
 <div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Clone repo Moccipult</h4>
-<pre><code>git clone https://github.com/fatmuh/moccipult.git
-cd moccipult</code></pre>
-</div>
-</div>
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>Clone Shorebird repos</h4>
+<pre><code>mkdir -p ~/shorebird-workspace && cd ~/shorebird-workspace
 
-<div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Jalankan script sesuai OS</h4>
-<pre><code># Linux / macOS:
-chmod +x setup-shorebird.sh
-./setup-shorebird.sh https://patches.yourdomain.com
-
-# Windows:
-setup-shorebird.bat https://patches.yourdomain.com</code></pre>
-<p>Script otomatis: cek prerequisites → clone repo → patch URL → build CLI → test.</p>
-</div>
-</div>
-
-<!-- ── CARA 3: MANUAL ── -->
-<h3 id="manual-setup">Cara 3 Detail: Manual Step-by-Step</h3>
-<p>Untuk yang mau ngerti prosesnya atau troubleshooting kalau auto-setup gagal.</p>
-
-<div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Buat workspace & clone repo Shorebird</h4>
-<pre><code># Buat folder workspace
-mkdir -p ~/shorebird-workspace
-cd ~/shorebird-workspace
-
-# Clone Shorebird CLI (Dart)
 git clone --depth 1 https://github.com/shorebirdtech/shorebird.git
-
-# Clone Shorebird updater (Rust)
 git clone --depth 1 https://github.com/shorebirdtech/updater.git</code></pre>
-<div class="alert alert-info">
-<span class="alert-icon">💡</span>
-<div><code class="inline-code">--depth 1</code> = clone cuma commit terakhir, lebih cepat. Repo shorebird lumayan besar.</div>
-</div>
-</div>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Patch semua URL ke server Moccipult</h4>
-<p>Script <code class="inline-code">patch_repos.py</code> akan scan semua file di repo shorebird dan mengganti URL Shorebird ke URL server kamu.</p>
-<pre><code># Dari root repo moccipult (atau path ke patch_repos.py)
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>Patch semua URL ke server kamu</h4>
+<pre><code># Preview dulu
 python3 patch_repos.py \
   --shorebird-path ~/shorebird-workspace/shorebird \
   --updater-path ~/shorebird-workspace/updater \
   --target-url https://patches.yourdomain.com \
   --dry-run
 
-# --dry-run = preview dulu, tidak ubah file
-# Kalau sudah yakin, jalankan tanpa --dry-run:
+# Kalau sudah yakin:
 python3 patch_repos.py \
   --shorebird-path ~/shorebird-workspace/shorebird \
   --updater-path ~/shorebird-workspace/updater \
   --target-url https://patches.yourdomain.com</code></pre>
-<p>URL yang di-replace:</p>
-<table class="params">
-<tr><th>URL Asli</th><th>Di-replace ke</th></tr>
-<tr><td><code>api.shorebird.dev</code></td><td rowspan="6">Server Moccipult kamu</td></tr>
-<tr><td><code>api.shorebird.cloud</code></td></tr>
-<tr><td><code>shorebird.cloud</code></td></tr>
-<tr><td><code>console.shorebird.dev</code></td></tr>
-<tr><td><code>console.shorebird.cloud</code></td></tr>
-<tr><td><code>storage.googleapis.com/shorebird</code></td></tr>
-</table>
-</div>
+    <p>URL yang di-replace:</p>
+    <table class="tbl">
+      <tr><th>URL Asli</th><th>Di-replace ke</th></tr>
+      <tr><td><code>api.shorebird.dev</code></td><td rowspan="6">Server Moccipult kamu</td></tr>
+      <tr><td><code>api.shorebird.cloud</code></td></tr>
+      <tr><td><code>shorebird.cloud</code></td></tr>
+      <tr><td><code>console.shorebird.dev</code></td></tr>
+      <tr><td><code>console.shorebird.cloud</code></td></tr>
+      <tr><td><code>storage.googleapis.com/shorebird</code></td></tr>
+    </table>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">3</div>
-<div class="step-content">
-<h4>Build updater (Rust)</h4>
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>Build updater (Rust)</h4>
 <pre><code>cd ~/shorebird-workspace/updater
-cargo build --release
-
-# Bisa lama 5-15 menit pertama kali (compile Rust)</code></pre>
-</div>
+cargo build --release</code></pre>
+    <p>Pertama kali bisa 5-15 menit.</p>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">4</div>
-<div class="step-content">
-<h4>Build Shorebird CLI (Dart)</h4>
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <h4>Build Shorebird CLI (Dart)</h4>
 <pre><code>cd ~/shorebird-workspace/shorebird
-
-# Install dependencies
 dart pub get
-
-# Compile ke native binary
-dart compile exe bin/shorebird.dart -o shorebird       # Linux/macOS
-dart compile exe bin/shorebird.dart -o shorebird.exe   # Windows</code></pre>
-</div>
+dart compile exe bin/shorebird.dart -o shorebird</code></pre>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">5</div>
-<div class="step-content">
-<h4>Test</h4>
+  <div class="step-num">5</div>
+  <div class="step-content">
+    <h4>Test & tambah ke PATH</h4>
 <pre><code>./shorebird --version
 
-# Kalau keluar versi, berarti CLI jalan normal.
-# CLI sekarang ngomong ke server Moccipult, bukan shorebird.dev.</n
-# (Opsional) Login — skip kalau server kamu tanpa auth
-./shorebird login</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">6</div>
-<div class="step-content">
-<h4>Tambah ke PATH (supaya bisa diakses dari mana aja)</h4>
-<pre><code># Linux/macOS — tambah ke ~/.bashrc atau ~/.zshrc:
+# Tambah ke PATH
 echo 'export PATH="$HOME/shorebird-workspace/shorebird:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-
-# Windows — tambah ke PATH via System Environment Variables,
-# atau copy shorebird.exe ke folder yang sudah di PATH.</code></pre>
-</div>
+source ~/.bashrc</code></pre>
+  </div>
 </div>
 
-<!-- ── UPDATE SHOREBIRD KE VERSI BARU ── -->
-<h3>Update Shorebird ke Versi Baru</h3>
-<p>Kalau Shorebird release versi baru dan kamu mau update:</p>
+<h3>Update ke Versi Shorebird Terbaru</h3>
+<pre><code>cd ~/shorebird-workspace/shorebird && git pull --rebase
+cd ~/shorebird-workspace/updater && git pull --rebase
 
-<div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Pull versi terbaru</h4>
-<pre><code>cd ~/shorebird-workspace/shorebird
-git pull --rebase
-
-cd ~/shorebird-workspace/updater
-git pull --rebase</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Patch ulang URL</h4>
-<pre><code>python3 patch_repos.py \
+# Patch ulang
+python3 patch_repos.py \
   --shorebird-path ~/shorebird-workspace/shorebird \
   --updater-path ~/shorebird-workspace/updater \
-  --target-url https://patches.yourdomain.com</code></pre>
-</div>
-</div>
+  --target-url https://patches.yourdomain.com
 
-<div class="step">
-<div class="step-num">3</div>
-<div class="step-content">
-<h4>Build ulang</h4>
-<pre><code>cd ~/shorebird-workspace/updater && cargo build --release
+# Build ulang
+cd ~/shorebird-workspace/updater && cargo build --release
 cd ~/shorebird-workspace/shorebird && dart pub get && dart compile exe bin/shorebird.dart -o shorebird</code></pre>
-</div>
-</div>
 
-<!-- ── TROUBLESHOOTING ── -->
 <h3>Troubleshooting</h3>
 
 <div class="card">
-<h4>❌ <code>rustc: command not found</code></h4>
-<p>Install Rust: <code class="inline-code">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></p>
-<p>Windows: download dari <a href="https://rustup.rs" target="_blank">rustup.rs</a></p>
+  <h4>❌ <code>rustc: command not found</code></h4>
+<pre><code># Install Rust:
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></pre>
 </div>
 
 <div class="card">
-<h4>❌ <code>protoc: command not found</code></h4>
-<pre><code># Ubuntu/Debian:
-sudo apt install protobuf-compiler
-
-# macOS:
-brew install protobuf
-
-# Windows:
-choco install protobuf</code></pre>
+  <h4>❌ <code>protoc: command not found</code></h4>
+<pre><code>sudo apt install protobuf-compiler  # Ubuntu/Debian
+brew install protobuf                 # macOS
+choco install protobuf                # Windows</code></pre>
 </div>
 
 <div class="card">
-<h4>❌ <code>dart: command not found</code></h4>
-<p>Dart sudah bundel dengan Flutter SDK. Pastikan <code class="inline-code">flutter --version</code> jalan, lalu:</p>
-<pre><code># Dart biasanya ada di:
-# Linux/macOS: ~/development/flutter/bin/dart
-# Windows: C:\flutter\bin\dart.bat
-
-# Pastikan Flutter/bin ada di PATH</code></pre>
+  <h4>❌ <code>dart: command not found</code></h4>
+  <p>Dart bundel dengan Flutter SDK. Pastikan <code class="ic">flutter/bin</code> ada di PATH.</p>
 </div>
 
 <div class="card">
-<h4>❌ <code>cargo build</code> error / lama banget</h4>
-<p>Build Rust pertama kali bisa 5-15 menit. Kalau error:</p>
-<pre><code># Cek versi Rust minimal:
-rustc --version   # butuh >= 1.70
-
-# Update Rust:
-rustup update</code></pre>
+  <h4>❌ CLI jalan tapi masih nyasar ke shorebird.dev</h4>
+  <p>Artinya patch belum ke-apply. Jalankan <code class="ic">patch_repos.py</code> tanpa <code class="ic">--dry-run</code>, lalu rebuild.</p>
+<pre><code>grep -r "shorebird.dev" ~/shorebird-workspace/shorebird/lib/ | head -5
+# Kalau ada hasil → belum di-patch</code></pre>
+</div>
 </div>
 
-<div class="card">
-<h4>❌ <code>shorebird --version</code> error setelah build</h4>
-<p>Cek apakah binary berhasil di-compile:</p>
-<pre><code>ls -la ~/shorebird-workspace/shorebird/shorebird
-
-# Kalau file tidak ada, compile ulang:
-cd ~/shorebird-workspace/shorebird
-dart compile exe bin/shorebird.dart -o shorebird 2>&1
-# ^ baca error message-nya</code></pre>
-</div>
-
-<div class="card">
-<h4>❌ Shorebird CLI jalan tapi masih nyasar ke shorebird.dev</h4>
-<p>Artinya patch URL belum ke-apply. Jalankan ulang <code class="inline-code">patch_repos.py</code> tanpa <code class="inline-code">--dry-run</code>, lalu rebuild CLI.</p>
-<pre><code># Cek apakah URL sudah terganti:
-grep -r "shorebird.dev" ~/shorebird-workspace/shorebird/lib/ | head -5
-# Kalau masih keluar hasil, berarti belum di-patch</code></pre>
-</div>
-
-</div>
-
-<!-- ═══════════════════════════════════════ -->
-<!-- PAGE: WORKFLOW HARIAN                    -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: WORKFLOW HARIAN -->
+<!-- ═══════════════════════════════════════════════ -->
 <div class="page" id="page-workflow">
 <h2>Workflow Harian</h2>
 <p class="subtitle">Cara kerja sehari-hari setelah setup selesai.</p>
 
 <h3>SEKALI SAJA: Release Pertama</h3>
-<p>Build app pertama kali dengan Shorebird engine, upload ke Play Store.</p>
 
 <div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Masuk ke folder Flutter project</h4>
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>Masuk ke folder Flutter project</h4>
 <pre><code>cd /path/to/my-flutter-app</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Build dengan Shorebird</h4>
-<pre><code># Pastikan CLI Shorebird yang sudah di-patch ada di PATH
- export PATH="$PATH:/path/to/shorebird-workspace/shorebird"
-
-# Build release pertama
- shorebird release android
-
-# CLI akan:
-#   1. Register app ke Moccipult server
-#   2. Build APK dengan Shorebird engine
-#   3. Upload baseline snapshot ke server
-#   4. Generate file .aab / .apk
-
-# Output:
-# ✅ App registered: MyApp (a1b2c3d4-...)
-# ✅ Release created: v1.0.0 #1 (x1y2z3w4-...)
-# ✅ Built: build/app/outputs/bundle/release/app-release.aab</code></pre>
-</div>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">3</div>
-<div class="step-content">
-<h4>Upload ke Play Store</h4>
-<p>Upload file <code class="inline-code">.aab</code> ke Google Play Console seperti biasa.</p>
-<p>File ini SUDAH mengandung Shorebird updater — jadi app bisa menerima patch.</p>
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>Build dengan Shorebird</h4>
+<pre><code># Pastikan shorebird yang sudah di-patch ada di PATH
+shorebird release android</code></pre>
+    <p>CLI akan: register app ke Moccipult → build APK dengan Shorebird engine → upload baseline snapshot → generate .aab</p>
+  </div>
 </div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>Upload ke Play Store</h4>
+    <p>Upload <code class="ic">.aab</code> ke Google Play Console seperti biasa. File ini SUDAH mengandung Shorebird updater.</p>
+  </div>
 </div>
 
 <h3>SETIAP KALI ADA BUG FIX: Push Patch</h3>
 
 <div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Fix bug di kode</h4>
-<p>Edit file Dart seperti biasa. Fix bug yang mau di-patch.</p>
-</div>
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>Fix bug di kode</h4>
+    <p>Edit file Dart seperti biasa.</p>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Push patch</h4>
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>Push patch</h4>
 <pre><code>shorebird patch android
 
 # CLI akan:
 #   1. Compile Flutter code baru
 #   2. Compare dengan snapshot sebelumnya
 #   3. Generate .bin (binary diff)
-#   4. Upload ke Moccipult server
-
-# Output:
-# ✅ Patch #2 uploaded (3.2 KB)
-# ✅ Available at: https://patches.yourdomain.com/downloads/...</code></pre>
-</div>
+#   4. Upload ke Moccipult server</code></pre>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">3</div>
-<div class="step-content">
-<h4>Selesai! 🎉</h4>
-<p>User buka app → otomatis download patch → bug fix langsung aktif.</p>
-<p><strong>Tanpa upload ke Play Store. Tanpa review. Tanpa tunggu.</strong></p>
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>Selesai! 🎉</h4>
+    <p>User buka app → otomatis download patch → bug fix aktif.<br><strong>Tanpa upload ke Play Store. Tanpa review. Tanpa tunggu.</strong></p>
+  </div>
 </div>
-</div>
 
-<h3>MONITORING: Pakai Moccipult CLI</h3>
-<pre><code># Cek server status
-moccipult status
-
-# List semua app
-moccipult apps list
-
-# List patch per release
-moccipult patches list -r &lt;RELEASE_ID&gt;
-
-# Rollback patch kalau ada masalah
-moccipult patches status &lt;PATCH_ID&gt; disabled
-
-# Re-enable patch
-moccipult patches status &lt;PATCH_ID&gt; active</code></pre>
-
-<h3>Flow Diagram</h3>
-<pre><code> RELEASE PERTAMA (sekali saja):
- ════════════════════════════════
-
- flutter code ──▶ shorebird release android
-                     │
-                     ├── ▶ Compile dengan Shorebird engine
-                     ├── ▶ Generate baseline snapshot
-                     ├── ▶ Register app + release ke Moccipult
-                     └── ▶ Output: app-release.aab
-                               │
-                               ▼
-                     Upload ke Play Store
-
-
- FIX BUG (setiap kali):
- ══════════════════════
-
- fix kode ──▶ shorebird patch android
-                   │
-                   ├── ▶ Compile ulang Flutter code
-                   ├── ▶ Diff snapshot lama vs baru
-                   ├── ▶ Generate .bin (patch file)
-                   └── ▶ Upload ke Moccipult server → S3
-                               │
-                               ▼
-                     User buka app → auto download → patch applied ✅</code></pre>
+<h3>Monitor dengan Moccipult CLI</h3>
+<pre><code>moccipult status                          # cek server
+moccipult apps list                        # list apps
+moccipult patches list -r &lt;RELEASE_ID&gt;     # list patches
+moccipult patches status &lt;ID&gt; disabled     # disable patch</code></pre>
 
 <h3>CLI Yang Dipakai Kapan</h3>
-<table class="params">
-<tr><th>Tugas</th><th>CLI</th><th>Command</th></tr>
-<tr><td>Build APK dengan updater</td><td><code>shorebird</code></td><td><code>shorebird release android</code></td></tr>
-<tr><td>Push patch fix bug</td><td><code>shorebird</code></td><td><code>shorebird patch android</code></td></tr>
-<tr><td>Cek server status</td><td><code>moccipult</code></td><td><code>moccipult status</code></td></tr>
-<tr><td>List apps / patches</td><td><code>moccipult</code></td><td><code>moccipult apps list</code></td></tr>
-<tr><td>Disable / rollback patch</td><td><code>moccipult</code></td><td><code>moccipult patches status ID disabled</code></td></tr>
+<table class="tbl">
+  <tr><th>Tugas</th><th>CLI</th><th>Command</th></tr>
+  <tr><td>Build APK dengan updater</td><td><code>shorebird</code></td><td><code>shorebird release android</code></td></tr>
+  <tr><td>Push patch fix bug</td><td><code>shorebird</code></td><td><code>shorebird patch android</code></td></tr>
+  <tr><td>Cek server status</td><td><code>moccipult</code></td><td><code>moccipult status</code></td></tr>
+  <tr><td>List apps / patches</td><td><code>moccipult</code></td><td><code>moccipult apps list</code></td></tr>
+  <tr><td>Disable / rollback patch</td><td><code>moccipult</code></td><td><code>moccipult patches status ID disabled</code></td></tr>
 </table>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PAGE: PLAY STORE                         -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: PLAY STORE -->
+<!-- ═══════════════════════════════════════════════ -->
 <div class="page" id="page-playstore">
-<h2>Tutorial Play Store</h2>
-<p class="subtitle">Langkah lengkap dari development sampai app live di Play Store dengan Moccipult.</p>
+<h2>Deploy ke Play Store</h2>
+<p class="subtitle">Dari development sampai live di Play Store dengan Moccipult.</p>
 
 <div class="alert alert-success">
-<span class="alert-icon">🤖</span>
-<div><strong>Android = 100% aman.</strong> Tidak ada batasan dari Google untuk code push. Banyak app besar menggunakan mekanisme serupa.</div>
+  <span class="alert-icon">🤖</span>
+  <div><strong>Android = 100% aman.</strong> Google tidak melarang code push. Banyak app besar pakai mekanisme serupa.</div>
 </div>
 
 <h3>Tahap 1: Setup Project</h3>
 
 <div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Buat project Flutter</h4>
-<pre><code>flutter create my_app
-cd my_app</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Tambahkan Moccipult ke pubspec.yaml</h4>
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>Tambahkan Moccipult ke pubspec.yaml</h4>
 <pre><code>dependencies:
   moccipult:
     git:
       url: https://github.com/fatmuh/moccipult.git
       path: flutter/moccipult</code></pre>
-</div>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">3</div>
-<div class="step-content">
-<h4>Edit main.dart</h4>
-<pre><code>import 'package:flutter/material.dart';
-import 'package:moccipult/moccipult.dart';
-
-void main() async {
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>Edit main.dart</h4>
+<pre><code>void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await MoccipultUpdater(
@@ -1535,276 +1048,151 @@ void main() async {
 
   runApp(const MyApp());
 }</code></pre>
-</div>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">4</div>
-<div class="step-content">
-<h4>Registrasi app di Moccipult</h4>
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>Registrasi app di Moccipult</h4>
 <pre><code>moccipult config server https://patches.yourdomain.com
-moccipult init
-# Catat App ID dan Release ID!</code></pre>
-</div>
+moccipult init</code></pre>
+  </div>
 </div>
 
-<h3>Tahap 2: Build & Upload ke Play Store</h3>
+<h3>Tahap 2: Build & Upload</h3>
 
 <div class="step">
-<div class="step-num">5</div>
-<div class="step-content">
-<h4>Buat signing key</h4>
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <h4>Buat signing key</h4>
 <pre><code>keytool -genkey -v -keystore release.keystore \
   -alias myapp -keyalg RSA -keysize 2048 -validity 10000</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">6</div>
-<div class="step-content">
-<h4>Build AAB (Android App Bundle)</h4>
-<pre><code>flutter build appbundle --release</code></pre>
-<p>File output ada di <code class="inline-code">build/app/outputs/bundle/release/app-release.aab</code></p>
-</div>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">7</div>
-<div class="step-content">
-<h4>Upload ke Google Play Console</h4>
-<ol>
-<li>Buka <a href="https://play.google.com/console" target="_blank">Google Play Console</a></li>
-<li>Buat app baru → isi detail</li>
-<li>Menu <strong>Release → Production → Create new release</strong></li>
-<li>Upload file <code class="inline-code">.aab</code></li>
-<li>Isi release notes</li>
-<li><strong>Review & Release</strong></li>
-</ol>
-</div>
+  <div class="step-num">5</div>
+  <div class="step-content">
+    <h4>Build AAB</h4>
+<pre><code>flutter build appbundle --release
+# Output: build/app/outputs/bundle/release/app-release.aab</code></pre>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">8</div>
-<div class="step-content">
-<h4>Tunggu review</h4>
-<p>Google review biasanya 1–3 hari untuk app baru. Setelah approve, app live di Play Store.</p>
-</div>
+  <div class="step-num">6</div>
+  <div class="step-content">
+    <h4>Upload ke Google Play Console</h4>
+    <p>Buka <a href="https://play.google.com/console" target="_blank">Play Console</a> → Buat app → Release → Production → Upload .aab → Submit.</p>
+  </div>
 </div>
 
-<h3>Tahap 3: Push Patch (Setiap Ada Bug Fix)</h3>
-
-<div class="step">
-<div class="step-num">9</div>
-<div class="step-content">
-<h4>Fix bug di kode</h4>
-<p>Edit kode Flutter seperti biasa.</p>
-</div>
-</div>
+<h3>Tahap 3: Push Patch</h3>
 
 <div class="step">
-<div class="step-num">10</div>
-<div class="step-content">
-<h4>Generate & upload patch</h4>
-<pre><code># Build patch file (sesuaikan dengan workflow tim kamu)
-moccipult patches upload -r &lt;RELEASE_ID&gt; -f patch.bin</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">11</div>
-<div class="step-content">
-<h4>Patch langsung live! 🎉</h4>
-<p>Semua user yang sudah install app akan otomatis mendapat patch saat buka app. <strong>Tanpa upload ke Play Store lagi.</strong></p>
-</div>
+  <div class="step-num">7</div>
+  <div class="step-content">
+    <h4>Fix bug, lalu push patch</h4>
+<pre><code>shorebird patch android</code></pre>
+    <p>Patch langsung live! User otomatis dapat update saat buka app.</p>
+  </div>
 </div>
 
 <div class="alert alert-warning">
-<span class="alert-icon">⚠️</span>
-<div><strong>Perhatian:</strong> Code push hanya untuk perbaikan bug kecil. Untuk perubahan besar (fitur baru, permission baru, native code changes), tetap harus upload versi baru ke Play Store.</div>
+  <span class="alert-icon">⚠️</span>
+  <div>Code push hanya untuk bug fix kecil. Untuk fitur baru, permission baru, atau native code changes — tetap upload versi baru ke Play Store.</div>
 </div>
 
-<h3>Tips</h3>
 <div class="card-grid">
-<div class="card">
-<h4>✅ Aman untuk code push</h4>
-<p>Fix typo, perbaikan UI, perbaikan logic bug, update teks, dsb.</p>
-</div>
-<div class="card">
-<h4>❌ Harus upload baru ke Store</h4>
-<p>Tambah permission baru, ubah native code, update SDK version, ubah app icon.</p>
-</div>
+  <div class="card">
+    <h4>✅ Aman untuk code push</h4>
+    <p>Fix typo, perbaikan UI, logic bug, update teks.</p>
+  </div>
+  <div class="card">
+    <h4>❌ Harus upload baru ke Store</h4>
+    <p>Permission baru, native code, SDK version, app icon.</p>
+  </div>
 </div>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PAGE: APP STORE                          -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: APP STORE -->
+<!-- ═══════════════════════════════════════════════ -->
 <div class="page" id="page-appstore">
-<h2>Tutorial App Store</h2>
-<p class="subtitle">Panduan integrasi Moccipult dengan iOS App Store.</p>
+<h2>Deploy ke App Store</h2>
+<p class="subtitle">Panduan integrasi dengan iOS App Store.</p>
 
 <div class="alert alert-danger">
-<span class="alert-icon">🍎</span>
-<div><strong>iOS ada risiko.</strong> Apple Guideline 2.5.2 melarang download executable code baru. Meskipun jarang di-enforce, ada kemungkinan app ditolak. <strong>Gunakan dengan risiko sendiri.</strong></div>
+  <span class="alert-icon">🍎</span>
+  <div><strong>iOS ada risiko.</strong> Apple Guideline 2.5.2 melarang download executable code. Meskipun jarang di-enforce, ada kemungkinan app ditolak. <strong>Gunakan dengan risiko sendiri.</strong></div>
 </div>
 
-<h3>Rekomendasi Penggunaan di iOS</h3>
-
+<h3>Rekomendasi</h3>
 <div class="card-grid">
-<div class="card" style="border-color:rgba(74,222,128,.3)">
-<div class="card-header">
-<div class="card-icon" style="background:var(--green-bg)">✅</div>
-<h4>Aman</h4>
-</div>
-<p>App internal (enterprise), TestFlight, app yang tidak dipublikasikan di App Store.</p>
-</div>
-<div class="card" style="border-color:rgba(248,113,113,.3)">
-<div class="card-header">
-<div class="card-icon" style="background:var(--red-bg)">⚠️</div>
-<h4>Risiko</h4>
-</div>
-<p>App publik di App Store. Apple mungkin menolak atau ban app. Riskanya rendah tapi ADA.</p>
-</div>
+  <div class="card">
+    <h4>✅ Aman</h4>
+    <p>App internal (enterprise), TestFlight, app yang tidak dipublikasikan di App Store.</p>
+  </div>
+  <div class="card">
+    <h4>⚠️ Risiko</h4>
+    <p>App publik di App Store. Apple mungkin menolak. Riskanya rendah tapi ADA.</p>
+  </div>
 </div>
 
-<h3>Tahap 1: Setup Project iOS</h3>
+<h3>Setup iOS</h3>
 
 <div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Pastikan Xcode & certificate sudah siap</h4>
-<pre><code># Cek Xcode
-xcode-select --install
-
-# Cek certificate di Keychain Access
-# Apple Development: your@email.com</code></pre>
-</div>
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>Tambahkan Moccipult (sama seperti Android)</h4>
+<pre><code>await MoccipultUpdater(
+  serverUrl: 'https://patches.yourdomain.com',
+  appId: 'YOUR_APP_ID',
+  platform: 'ios',   // ← ganti ke ios
+).checkAndApply();</code></pre>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">2</div>
-<div class="step-content">
-<h4>Tambahkan Moccipult (sama seperti Android)</h4>
-<pre><code>// main.dart
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await MoccipultUpdater(
-    serverUrl: 'https://patches.yourdomain.com',
-    appId: 'YOUR_APP_ID',
-    platform: 'ios',  // ← ganti ke ios
-  ).checkAndApply();
-
-  runApp(const MyApp());
-}</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">3</div>
-<div class="step-content">
-<h4>Registrasi app dengan platform ios</h4>
-<pre><code>moccipult apps create -n "My App" -p com.example.app --platform ios</code></pre>
-</div>
-</div>
-
-<h3>Tahap 2: Build & Upload ke App Store</h3>
-
-<div class="step">
-<div class="step-num">4</div>
-<div class="step-content">
-<h4>Build IPA</h4>
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>Build & upload IPA</h4>
 <pre><code>flutter build ipa --release</code></pre>
-</div>
-</div>
-
-<div class="step">
-<div class="step-num">5</div>
-<div class="step-content">
-<h4>Upload via Xcode atau Transporter</h4>
-<ol>
-<li>Buka <strong>Xcode → Organizer</strong></li>
-<li>Pilih archive yang baru</li>
-<li>Klik <strong>Distribute App → App Store Connect</strong></li>
-<li>Atau gunakan app <strong>Transporter</strong> dari Mac App Store</li>
-</ol>
-</div>
+    <p>Upload via Xcode Organizer atau Transporter.</p>
+  </div>
 </div>
 
 <div class="step">
-<div class="step-num">6</div>
-<div class="step-content">
-<h4>Submit di App Store Connect</h4>
-<ol>
-<li>Buka <a href="https://appstoreconnect.apple.com" target="_blank">App Store Connect</a></li>
-<li>Pilih app → <strong>App Store → iOS App</strong></li>
-<li>Pilih build yang di-upload</li>
-<li>Isi: screenshot, deskripsi, keywords, dsb.</li>
-<li>Klik <strong>Submit for Review</strong></li>
-</ol>
-</div>
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>Submit di App Store Connect</h4>
+    <p>Pilih build → isi detail → Submit for Review.</p>
+  </div>
 </div>
 
-<div class="step">
-<div class="step-num">7</div>
-<div class="step-content">
-<h4>Tunggu review Apple</h4>
-<p>Apple review biasanya 1–2 hari. App baru bisa lebih lama (sampai 7 hari).</p>
-</div>
-</div>
+<h3>Strategi Aman: Dual Platform</h3>
+<pre><code>final updater = MoccipultUpdater(
+  serverUrl: 'https://patches.yourdomain.com',
+  appId: Platform.isAndroid ? 'ANDROID_APP_ID' : 'IOS_APP_ID',
+);
 
-<h3>Tahap 3: Push Patch ke iOS</h3>
-
-<div class="step">
-<div class="step-num">8</div>
-<div class="step-content">
-<h4>Upload patch seperti biasa</h4>
-<pre><code>moccipult patches upload -r &lt;RELEASE_ID_IOS&gt; -f patch.bin</code></pre>
-<p>Proses sama persis seperti Android. User iOS otomatis dapat patch.</p>
-</div>
-</div>
-
-<h3>Strategi Aman untuk iOS</h3>
-
-<div class="card">
-<h4>🔥 Rekomendasi: Dual Strategy</h4>
-<p>Gunakan pendekatan berbeda per platform:</p>
-<pre><code>void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  final updater = MoccipultUpdater(
-    serverUrl: 'https://patches.yourdomain.com',
-    appId: Platform.isAndroid ? 'ANDROID_APP_ID' : 'IOS_APP_ID',
-  );
-
-  if (Platform.isAndroid) {
-    // Android: full code push
-    await updater.checkAndApply();
-  } else {
-    // iOS: hanya cek, tampilkan notif untuk update dari App Store
-    final result = await updater.checkForPatch(
-      version: packageInfo.version,
-    );
-    if (result.available) {
-      // Tampilkan dialog: "Update tersedia, download dari App Store?"
-    }
+if (Platform.isAndroid) {
+  // Android: full code push
+  await updater.checkAndApply();
+} else {
+  // iOS: hanya cek, tampilkan notif update dari App Store
+  final result = await updater.checkForPatch(version: version);
+  if (result.available) {
+    // Tampilkan dialog: "Update tersedia di App Store"
   }
-
-  runApp(const MyApp());
 }</code></pre>
-</div>
 
-<div class="alert alert-warning">
-<span class="alert-icon">💡</span>
-<div><strong>Tips:</strong> Untuk app internal (enterprise distribution), kamu bisa menggunakan full code push di iOS tanpa khawatir. Batasan Apple hanya berlaku untuk app publik di App Store.</div>
-</div>
-
-<h3>Perbandingan Strategi iOS</h3>
-<table class="params">
-<tr><th>Strategi</th><th>Internal App</th><th>App Store</th></tr>
-<tr><td>Full Code Push</td><td>✅ Aman</td><td>⚠️ Berisiko</td></tr>
-<tr><td>Notif update saja</td><td>✅ Aman</td><td>✅ Aman</td></tr>
-<tr><td>Tanpa code push</td><td>✅ Aman</td><td>✅ Aman</td></tr>
+<table class="tbl">
+  <tr><th>Strategi</th><th>Internal App</th><th>App Store</th></tr>
+  <tr><td>Full Code Push</td><td>✅ Aman</td><td>⚠️ Berisiko</td></tr>
+  <tr><td>Notif update saja</td><td>✅ Aman</td><td>✅ Aman</td></tr>
+  <tr><td>Tanpa code push</td><td>✅ Aman</td><td>✅ Aman</td></tr>
 </table>
 </div>
 
@@ -1812,23 +1200,20 @@ void main() async {
 </div>
 
 <script>
-// ─── Navigation ───
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
     const page = item.dataset.page;
-    // Update nav
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     item.classList.add('active');
-    // Update page
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + page).classList.add('active');
-    // Scroll to top
+    const el = document.getElementById('page-' + page);
+    if (el) el.classList.add('active');
     window.scrollTo(0, 0);
   });
 });
 
-// ─── Auto-detect server URL ───
-document.getElementById('baseUrl').textContent = window.location.origin;
+const baseEl = document.getElementById('baseUrl');
+if (baseEl) baseEl.textContent = window.location.origin;
 </script>
 </body>
 </html>
