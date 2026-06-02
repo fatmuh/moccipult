@@ -269,7 +269,14 @@ jobs:
             installer: macos
             artifact: moccipult-macos
             binary: moccipult-macos
+            arch: x86_64
             output: moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64.pkg
+          - os: macos-latest
+            installer: macos-arm
+            artifact: moccipult-macos-arm
+            binary: moccipult-macos-arm
+            arch: arm64
+            output: moccipult-${{ needs.auto-tag.outputs.version }}-macos-arm64.pkg
 
     steps:
       - name: Checkout
@@ -321,32 +328,30 @@ jobs:
 
       # ── macOS Installers (.pkg + .dmg) ──
       - name: Build macOS .pkg installer
-        if: matrix.installer == 'macos'
+        if: startsWith(matrix.installer, 'macos')
         run: |
           chmod +x installer/macos/build-pkg.sh
           chmod +x installer/macos/scripts/postinstall
-          bash installer/macos/build-pkg.sh "${{ needs.auto-tag.outputs.version }}" "dist/${{ matrix.binary }}" "x86_64"
+          bash installer/macos/build-pkg.sh "${{ needs.auto-tag.outputs.version }}" "dist/${{ matrix.binary }}" "${{ matrix.arch }}"
 
       - name: Build macOS .dmg
-        if: matrix.installer == 'macos'
+        if: startsWith(matrix.installer, 'macos')
         run: |
-          DMG_NAME="moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64"
+          DMG_NAME="moccipult-${{ needs.auto-tag.outputs.version }}-macos-${{ matrix.arch }}"
           DMG_DIR="/tmp/dmg-staging"
           rm -rf "$DMG_DIR"
           mkdir -p "$DMG_DIR"
           cp "dist/${{ matrix.binary }}" "$DMG_DIR/moccipult"
           chmod +x "$DMG_DIR/moccipult"
-          # Create Applications symlink
           ln -s /Applications "$DMG_DIR/Applications"
-          # Create DMG
           hdiutil create -volname "Moccipult" -srcfolder "$DMG_DIR" -ov -format UDZO "installer/macos/output/$DMG_NAME.dmg"
           rm -rf "$DMG_DIR"
 
       - name: Upload macOS installers
-        if: matrix.installer == 'macos'
+        if: startsWith(matrix.installer, 'macos')
         uses: actions/upload-artifact@v4
         with:
-          name: installer-macos
+          name: installer-${{ matrix.installer }}
           path: |
             installer/macos/output/*.pkg
             installer/macos/output/*.dmg
@@ -392,8 +397,10 @@ jobs:
             |----------|------|
             | Windows Setup | `moccipult-setup-${{ needs.auto-tag.outputs.version }}.exe` |
             | Linux DEB | `moccipult_${{ needs.auto-tag.outputs.version }}_amd64.deb` |
-            | macOS PKG | `moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64.pkg` |
-            | macOS DMG | `moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64.dmg` |
+            | macOS DMG (Intel) | `moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64.dmg` |
+            | macOS DMG (Apple Silicon) | `moccipult-${{ needs.auto-tag.outputs.version }}-macos-arm64.dmg` |
+            | macOS PKG (Intel) | `moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64.pkg` |
+            | macOS PKG (Apple Silicon) | `moccipult-${{ needs.auto-tag.outputs.version }}-macos-arm64.pkg` |
 
             ### Portable Binaries
             | Platform | File |
