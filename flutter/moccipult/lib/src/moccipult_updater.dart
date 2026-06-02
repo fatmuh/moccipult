@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'moccipult_config.dart';
@@ -99,9 +98,12 @@ class MoccipultUpdater {
   /// Called for status updates
   void Function(String status)? onStatusChanged;
 
+  final String appVersion;
+
   MoccipultUpdater({
     required this.serverUrl,
     required this.appId,
+    required this.appVersion,
     this.platform = 'android',
     this.channel = 'stable',
     this.timeout = const Duration(seconds: 30),
@@ -118,9 +120,7 @@ class MoccipultUpdater {
       final config = await MoccipultConfig.load();
       final currentPatchNumber = config?.currentPatchNumber ?? 0;
 
-      // Get app version
-      final packageInfo = await PackageInfo.fromPlatform();
-      final version = packageInfo.version;
+      final version = appVersion;
 
       // Check server
       final result = await checkForPatch(

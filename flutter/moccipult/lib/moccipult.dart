@@ -12,6 +12,7 @@ library moccipult;
 ///   final updater = MoccipultUpdater(
 ///     serverUrl: 'https://patches.yourdomain.com',
 ///     appId: 'your-app-id',
+///     appVersion: '1.0.0',  // from pubspec.yaml or hardcoded
 ///   );
 ///
 ///   // Check and apply patch before running app

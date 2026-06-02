@@ -472,7 +472,8 @@ void main() async {
   // ── Tambahkan 3 baris ini ──
   await MoccipultUpdater(
     serverUrl: 'https://patches.yourdomain.com',
-    appId: 'YOUR_APP_ID',   // dari moccipult init
+    appId: 'YOUR_APP_ID',
+    appVersion: '1.0.0',
     platform: 'android',    // atau 'ios'
   ).checkAndApply();
   // ── Selesai ──
@@ -484,6 +485,7 @@ void main() async {
 <pre><code>final updater = MoccipultUpdater(
   serverUrl: 'https://patches.yourdomain.com',
   appId: 'YOUR_APP_ID',
+  appVersion: '1.0.0',
 );
 
 updater.onUpdateAvailable = (patch) {
@@ -1043,6 +1045,7 @@ moccipult patches status &lt;ID&gt; disabled     # disable patch</code></pre>
   await MoccipultUpdater(
     serverUrl: 'https://patches.yourdomain.com',
     appId: 'YOUR_APP_ID',
+    appVersion: '1.0.0',
     platform: 'android',
   ).checkAndApply();
 
@@ -1149,6 +1152,7 @@ moccipult init</code></pre>
 <pre><code>await MoccipultUpdater(
   serverUrl: 'https://patches.yourdomain.com',
   appId: 'YOUR_APP_ID',
+    appVersion: '1.0.0',
   platform: 'ios',   // ← ganti ke ios
 ).checkAndApply();</code></pre>
   </div>
@@ -1175,6 +1179,7 @@ moccipult init</code></pre>
 <pre><code>final updater = MoccipultUpdater(
   serverUrl: 'https://patches.yourdomain.com',
   appId: Platform.isAndroid ? 'ANDROID_APP_ID' : 'IOS_APP_ID',
+  appVersion: '1.0.0',
 );
 
 if (Platform.isAndroid) {

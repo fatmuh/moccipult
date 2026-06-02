@@ -13,7 +13,6 @@ dependencies:
   http: ^1.2.0
   path_provider: ^2.1.0
   crypto: ^3.0.3
-  package_info_plus: ^5.0.0
   shared_preferences: ^2.2.0
 dev_dependencies:
   flutter_test:
