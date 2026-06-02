@@ -1,0 +1,37 @@
+# Docker Compose for Dokploy / Production
+# Pulls pre-built image from GHCR
+
+version: "3.9"
+
+services:
+  moccipult:
+    image: ghcr.io/fmnlpro/moccipult:latest
+    container_name: moccipult
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - moccipult-data:/app/data
+      - moccipult-storage:/app/patches-storage
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DB_PATH=/app/data/patches.db
+      - STORAGE_PATH=/app/patches-storage
+      # ⚠️ GANTI dengan URL publik server lo
+      - SERVER_URL=https://patches.yourdomain.com
+      - API_KEY=
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+volumes:
+  moccipult-data:
+    driver: local
+  moccipult-storage:
+    driver: local

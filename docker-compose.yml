@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  patch-server:
+    image: ghcr.io/fmnlpro/moccipult:latest
+    # Uncomment below & comment 'image:' if building locally
+    # build:
+    #   context: ./patch-server
+    #   dockerfile: Dockerfile
+    container_name: moccipult-patch-server
+    ports:
+      - "3000:3000"
+    volumes:
+      - patch-server-data:/app/data
+      - patch-server-storage:/app/patches-storage
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DB_PATH=/app/data/patches.db
+      - STORAGE_PATH=/app/patches-storage
+      # IMPORTANT: Change to your actual server URL in production
+      - SERVER_URL=http://localhost:3000
+      - API_KEY=
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  patch-server-data:
+    driver: local
+  patch-server-storage:
+    driver: local

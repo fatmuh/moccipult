@@ -1,0 +1,104 @@
+const express = require("express");
+const router = express.Router();
+const { v4: uuidv4 } = require("uuid");
+const { getDb } = require("../database");
+
+// =============================================
+// POST /api/v1/apps — Register a new app
+// =============================================
+router.post("/apps", (req, res) => {
+  const { name, package_name, platform } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: "App name is required" });
+  }
+
+  const db = getDb();
+  const id = uuidv4();
+
+  try {
+    db.prepare(
+      `INSERT INTO apps (id, name, package_name, platform) VALUES (?, ?, ?, ?)`
+    ).run(id, name, package_name || null, platform || "android");
+
+    const app = db.prepare("SELECT * FROM apps WHERE id = ?").get(id);
+    res.status(201).json({ ok: true, app });
+  } catch (err) {
+    console.error("Error creating app:", err);
+    res.status(500).json({ error: "Failed to create app" });
+  }
+});
+
+// =============================================
+// GET /api/v1/apps — List all apps
+// =============================================
+router.get("/apps", (req, res) => {
+  const db = getDb();
+  const apps = db.prepare("SELECT * FROM apps ORDER BY created_at DESC").all();
+  res.json({ ok: true, apps });
+});
+
+// =============================================
+// GET /api/v1/apps/:id — Get app details
+// =============================================
+router.get("/apps/:id", (req, res) => {
+  const db = getDb();
+  const app = db.prepare("SELECT * FROM apps WHERE id = ?").get(req.params.id);
+
+  if (!app) {
+    return res.status(404).json({ error: "App not found" });
+  }
+
+  res.json({ ok: true, app });
+});
+
+// =============================================
+// POST /api/v1/releases — Create a release
+// =============================================
+router.post("/releases", (req, res) => {
+  const { app_id, version, platform, channel } = req.body;
+
+  if (!app_id || !version) {
+    return res.status(400).json({ error: "app_id and version are required" });
+  }
+
+  const db = getDb();
+  const id = uuidv4();
+
+  try {
+    db.prepare(
+      `INSERT INTO releases (id, app_id, version, platform, channel)
+       VALUES (?, ?, ?, ?, ?)`
+    ).run(id, app_id, version, platform || "android", channel || "stable");
+
+    const release = db.prepare("SELECT * FROM releases WHERE id = ?").get(id);
+    res.status(201).json({ ok: true, release });
+  } catch (err) {
+    if (err.message.includes("UNIQUE constraint failed")) {
+      return res.status(409).json({ error: "Release already exists for this app/version/platform/channel" });
+    }
+    console.error("Error creating release:", err);
+    res.status(500).json({ error: "Failed to create release" });
+  }
+});
+
+// =============================================
+// GET /api/v1/releases?app_id=... — List releases
+// =============================================
+router.get("/releases", (req, res) => {
+  const db = getDb();
+  const { app_id } = req.query;
+
+  let releases;
+  if (app_id) {
+    releases = db
+      .prepare("SELECT * FROM releases WHERE app_id = ? ORDER BY created_at DESC")
+      .all(app_id);
+  } else {
+    releases = db.prepare("SELECT * FROM releases ORDER BY created_at DESC").all();
+  }
+
+  res.json({ ok: true, releases });
+});
+
+module.exports = router;

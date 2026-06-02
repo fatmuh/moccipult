@@ -1,0 +1,27 @@
+{
+  "name": "moccipult-cli",
+  "version": "1.0.0",
+  "description": "Moccipult CLI — Self-hosted Shorebird patch server tool",
+  "bin": {
+    "moccipult": "./bin/moccipult.js"
+  },
+  "scripts": {
+    "build": "pkg . --targets node18-win-x64,node18-linux-x64,node18-macos-x64 --output dist/moccipult",
+    "build:win": "pkg . --targets node18-win-x64 --output dist/moccipult-windows.exe",
+    "build:linux": "pkg . --targets node18-linux-x64 --output dist/moccipult-linux",
+    "build:mac": "pkg . --targets node18-macos-x64 --output dist/moccipult-macos"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "inquirer": "^8.2.6",
+    "conf": "^10.2.0",
+    "form-data": "^4.0.1",
+    "node-fetch": "^2.7.0",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}

@@ -1,0 +1,113 @@
+name: Build CLI Binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-cli:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - target: node18-win-x64
+            output: moccipult-windows.exe
+            artifact: moccipult-windows
+          - target: node18-linux-x64
+            output: moccipult-linux
+            artifact: moccipult-linux
+          - target: node18-macos-x64
+            output: moccipult-macos
+            artifact: moccipult-macos
+          - target: node18-macos-arm64
+            output: moccipult-macos-arm
+            artifact: moccipult-macos-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: cli
+        run: npm install
+
+      - name: Build binary
+        working-directory: cli
+        run: npx pkg . --targets ${{ matrix.target }} --output dist/${{ matrix.output }} --compress GZip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: cli/dist/${{ matrix.output }}
+          if-no-files-found: error
+
+  release:
+    needs: build-cli
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: List files
+        run: find dist -type f -ls
+
+      - name: Extract version from tag
+        id: tag
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.version }}
+          name: "Moccipult ${{ steps.tag.outputs.version }}"
+          body: |
+            ## 🚀 Moccipult ${{ steps.tag.outputs.version }}
+
+            ### Downloads
+            | Platform | File |
+            |----------|------|
+            | Windows x64 | `moccipult-windows.exe` |
+            | Linux x64 | `moccipult-linux` |
+            | macOS x64 | `moccipult-macos` |
+            | macOS ARM | `moccipult-macos-arm` |
+
+            ### Docker
+            ```bash
+            docker pull ghcr.io/fmnlpro/moccipult:${{ steps.tag.outputs.version }}
+            ```
+
+            ### Quick Start
+            ```bash
+            # Set server
+            moccipult config server https://your-server.com
+
+            # Setup project
+            moccipult init
+
+            # Upload patch
+            moccipult patches upload -r <RELEASE_ID> -f patch.bin
+            ```
+          files: |
+            dist/moccipult-windows/moccipult-windows.exe
+            dist/moccipult-linux/moccipult-linux
+            dist/moccipult-macos/moccipult-macos
+            dist/moccipult-macos-arm/moccipult-macos-arm
+          generate_release_notes: true
