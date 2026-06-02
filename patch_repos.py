@@ -30,7 +30,7 @@ log = logging.getLogger("patch-repos")
 # ─── Patterns to find and replace ───────────────────────────────────────────
 
 # Each tuple: (pattern_to_search, replacement_group_name, description)
-REPLACEMENTS: List[Tuple[str, str, str]] = [
+REPLACEMENTS: List[Tuple[str, str]] = [
     # Primary API endpoints
     (
         r"https?://api\.shorebird\.dev",
@@ -89,7 +89,7 @@ def find_replacements(content: str, target_url: str) -> Tuple[str, List[dict]]:
     changes = []
     new_content = content
 
-    for pattern in REPLACEMENTS:
+    for pattern, _description in REPLACEMENTS:
         matches = list(re.finditer(pattern, content))
         if matches:
             new_content = re.sub(pattern, target_url.rstrip("/"), new_content)
