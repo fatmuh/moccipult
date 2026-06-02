@@ -150,6 +150,9 @@ code{font-family:var(--font-mono);font-size:13.5px}
 </div>
 
 <div class="nav-section">
+<div class="nav-section-title">Setup</div>
+<div class="nav-item" data-page="setup"><span class="icon">🔧</span> Setup Shorebird CLI</div>
+<div class="nav-item" data-page="workflow"><span class="icon">🔄</span> Workflow Harian</div>
 <div class="nav-section-title">Deploy</div>
 <div class="nav-item" data-page="playstore"><span class="icon">🤖</span> Play Store</div>
 <div class="nav-item" data-page="appstore"><span class="icon">🍎</span> App Store</div>
@@ -935,6 +938,302 @@ moccipult status
 # ✅ Server: https://patches.yourdomain.com
 # 📱 App: MyApp (com.example.app)
 # Patch: #3</code></pre>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PAGE: SETUP SHOREBIRD CLI                -->
+<!-- ═══════════════════════════════════════ -->
+<div class="page" id="page-setup">
+<h2>Setup Shorebird CLI + Moccipult</h2>
+<p class="subtitle">Fork Shorebird CLI open-source, patch supaya ngomong ke server Moccipult kamu. 100% gratis, tanpa batasan.</p>
+
+<div class="alert alert-success">
+<span class="alert-icon">✅</span>
+<div><strong>Kenapa cara ini?</strong> Shorebird CLI open-source (MIT/Apache). Kita cuma ganti server URL-nya. Engine + compiler tetap resmi dari Shorebird. Server kita handle distribusi patch — jadi <strong>gratis & unlimited</strong>.</div>
+</div>
+
+<h3>Prerequisites</h3>
+<p>Sebelum mulai, pastikan ini sudah terinstall:</p>
+<table class="params">
+<tr><th>Tool</th><th>Install</th><th>Cek</th></tr>
+<tr><td>Git</td><td><a href="https://git-scm.com" target="_blank">git-scm.com</a></td><td><code class="inline-code">git --version</code></td></tr>
+<tr><td>Rust</td><td><a href="https://rustup.rs" target="_blank">rustup.rs</a></td><td><code class="inline-code">rustc --version</code></td></tr>
+<tr><td>Flutter SDK</td><td><a href="https://flutter.dev" target="_blank">flutter.dev</a></td><td><code class="inline-code">flutter --version</code></td></tr>
+<tr><td>Protobuf</td><td><code class="inline-code">apt install protobuf-compiler</code> / <code class="inline-code">brew install protobuf</code></td><td><code class="inline-code">protoc --version</code></td></tr>
+<tr><td>Python 3</td><td>sudah ada biasanya</td><td><code class="inline-code">python3 --version</code></td></tr>
+<tr><td>Android NDK</td><td>Via Android Studio → SDK Manager</td><td><code class="inline-code">echo $ANDROID_NDK_HOME</code></td></tr>
+</table>
+
+<h3>Cara Cepat: Setup Script</h3>
+<p>Kita udah nyiapin script otomatis yang handle semuanya:</p>
+
+<h4>Linux / macOS</h4>
+<pre><code># Clone repo Moccipult
+ git clone https://github.com/fatmuh/moccipult.git
+ cd moccipult
+
+# Jalankan setup script
+ chmod +x setup-shorebird.sh
+ ./setup-shorebird.sh https://patches.yourdomain.com</code></pre>
+
+<h4>Windows</h4>
+<pre><code># Clone repo Moccipult
+ git clone https://github.com/fatmuh/moccipult.git
+ cd moccipult
+
+# Jalankan setup script
+ setup-shorebird.bat https://patches.yourdomain.com</code></pre>
+
+<p>Script akan otomatis: clone repo → patch URL → build CLI → siap pakai.</p>
+
+<h3>Manual Step-by-Step</h3>
+<p>Kalau mau ngerti prosesnya atau script error:</p>
+
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>Clone Shorebird repos</h4>
+<pre><code>mkdir shorebird-workspace && cd shorebird-workspace
+
+# Clone CLI
+ git clone --depth 1 https://github.com/shorebirdtech/shorebird.git
+
+# Clone updater
+ git clone --depth 1 https://github.com/shorebirdtech/updater.git</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>Patch semua URL ke server kamu</h4>
+<pre><code># Dari root repo moccipult
+ python patch_repos.py \
+   --shorebird-path ./shorebird-workspace/shorebird \
+   --updater-path ./shorebird-workspace/updater \
+   --target-url https://patches.yourdomain.com \
+   --dry-run      # preview dulu
+
+# Kalau sudah yakin, tanpa --dry-run
+ python patch_repos.py \
+   --shorebird-path ./shorebird-workspace/shorebird \
+   --updater-path ./shorebird-workspace/updater \
+   --target-url https://patches.yourdomain.com</code></pre>
+<p>Script akan scan semua file dan mengganti <code class="inline-code">api.shorebird.dev</code>, <code class="inline-code">api.shorebird.cloud</code>, dll ke URL server kamu.</p>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">3</div>
+<div class="step-content">
+<h4>Build updater (Rust)</h4>
+<pre><code>cd shorebird-workspace/updater
+cargo build --release</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">4</div>
+<div class="step-content">
+<h4>Build Shorebird CLI</h4>
+<pre><code>cd shorebird-workspace/shorebird
+
+# Install dependencies
+dart pub get
+
+# Compile ke binary
+dart compile exe bin/shorebird.dart -o shorebird   # Linux/Mac
+dart compile exe bin/shorebird.dart -o shorebird.exe  # Windows</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">5</div>
+<div class="step-content">
+<h4>Test koneksi</h4>
+<pre><code>./shorebird --version
+
+# Login (skip kalau server kamu tanpa auth)
+./shorebird login</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">6</div>
+<div class="step-content">
+<h4>Done! 🎉</h4>
+<p>CLI Shorebird sekarang ngomong ke server Moccipult kamu, bukan shorebird.dev.</p>
+</div>
+</div>
+
+<h3>Arsitektur Setelah Setup</h3>
+<pre><code>SEBELUM (Shorebird resmi):
+═══════════════════════════
+ shorebird CLI → api.shorebird.dev → Shorebird Cloud (bayar)
+
+
+SESUDAH (Moccipult):
+═════════════════════
+ shorebird CLI → patches.yourdomain.com → Server kamu (GRATIS)
+                 ↑                          ├── Express API
+                 Di-patch oleh              ├── SQLite DB
+                 patch_repos.py             └── IDCloudHost S3
+
+
+Yang berubah: HANYA URL server
+Yang TETAP SAMA:
+  ✅ Shorebird engine (modified Flutter engine)
+  ✅ AOT snapshot compiler
+  ✅ Patch generation algorithm
+  ✅ Native updater code
+  ✅ Dart/Flutter toolchain</code></pre>
+
+<div class="alert alert-warning">
+<span class="alert-icon">⚠️</span>
+<div><strong>Kalau Shorebird update versi baru:</strong> Cukup <code class="inline-code">git pull</code> di repo shorebird, lalu jalankan <code class="inline-code">patch_repos.py</code> lagi. Build ulang CLI. Selesai.</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PAGE: WORKFLOW HARIAN                    -->
+<!-- ═══════════════════════════════════════ -->
+<div class="page" id="page-workflow">
+<h2>Workflow Harian</h2>
+<p class="subtitle">Cara kerja sehari-hari setelah setup selesai.</p>
+
+<h3>SEKALI SAJA: Release Pertama</h3>
+<p>Build app pertama kali dengan Shorebird engine, upload ke Play Store.</p>
+
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>Masuk ke folder Flutter project</h4>
+<pre><code>cd /path/to/my-flutter-app</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>Build dengan Shorebird</h4>
+<pre><code># Pastikan CLI Shorebird yang sudah di-patch ada di PATH
+ export PATH="$PATH:/path/to/shorebird-workspace/shorebird"
+
+# Build release pertama
+ shorebird release android
+
+# CLI akan:
+#   1. Register app ke Moccipult server
+#   2. Build APK dengan Shorebird engine
+#   3. Upload baseline snapshot ke server
+#   4. Generate file .aab / .apk
+
+# Output:
+# ✅ App registered: MyApp (a1b2c3d4-...)
+# ✅ Release created: v1.0.0 #1 (x1y2z3w4-...)
+# ✅ Built: build/app/outputs/bundle/release/app-release.aab</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">3</div>
+<div class="step-content">
+<h4>Upload ke Play Store</h4>
+<p>Upload file <code class="inline-code">.aab</code> ke Google Play Console seperti biasa.</p>
+<p>File ini SUDAH mengandung Shorebird updater — jadi app bisa menerima patch.</p>
+</div>
+</div>
+
+<h3>SETIAP KALI ADA BUG FIX: Push Patch</h3>
+
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>Fix bug di kode</h4>
+<p>Edit file Dart seperti biasa. Fix bug yang mau di-patch.</p>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>Push patch</h4>
+<pre><code>shorebird patch android
+
+# CLI akan:
+#   1. Compile Flutter code baru
+#   2. Compare dengan snapshot sebelumnya
+#   3. Generate .bin (binary diff)
+#   4. Upload ke Moccipult server
+
+# Output:
+# ✅ Patch #2 uploaded (3.2 KB)
+# ✅ Available at: https://patches.yourdomain.com/downloads/...</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">3</div>
+<div class="step-content">
+<h4>Selesai! 🎉</h4>
+<p>User buka app → otomatis download patch → bug fix langsung aktif.</p>
+<p><strong>Tanpa upload ke Play Store. Tanpa review. Tanpa tunggu.</strong></p>
+</div>
+</div>
+
+<h3>MONITORING: Pakai Moccipult CLI</h3>
+<pre><code># Cek server status
+moccipult status
+
+# List semua app
+moccipult apps list
+
+# List patch per release
+moccipult patches list -r &lt;RELEASE_ID&gt;
+
+# Rollback patch kalau ada masalah
+moccipult patches status &lt;PATCH_ID&gt; disabled
+
+# Re-enable patch
+moccipult patches status &lt;PATCH_ID&gt; active</code></pre>
+
+<h3>Flow Diagram</h3>
+<pre><code> RELEASE PERTAMA (sekali saja):
+ ════════════════════════════════
+
+ flutter code ──▶ shorebird release android
+                     │
+                     ├── ▶ Compile dengan Shorebird engine
+                     ├── ▶ Generate baseline snapshot
+                     ├── ▶ Register app + release ke Moccipult
+                     └── ▶ Output: app-release.aab
+                               │
+                               ▼
+                     Upload ke Play Store
+
+
+ FIX BUG (setiap kali):
+ ══════════════════════
+
+ fix kode ──▶ shorebird patch android
+                   │
+                   ├── ▶ Compile ulang Flutter code
+                   ├── ▶ Diff snapshot lama vs baru
+                   ├── ▶ Generate .bin (patch file)
+                   └── ▶ Upload ke Moccipult server → S3
+                               │
+                               ▼
+                     User buka app → auto download → patch applied ✅</code></pre>
+
+<h3>CLI Yang Dipakai Kapan</h3>
+<table class="params">
+<tr><th>Tugas</th><th>CLI</th><th>Command</th></tr>
+<tr><td>Build APK dengan updater</td><td><code>shorebird</code></td><td><code>shorebird release android</code></td></tr>
+<tr><td>Push patch fix bug</td><td><code>shorebird</code></td><td><code>shorebird patch android</code></td></tr>
+<tr><td>Cek server status</td><td><code>moccipult</code></td><td><code>moccipult status</code></td></tr>
+<tr><td>List apps / patches</td><td><code>moccipult</code></td><td><code>moccipult apps list</code></td></tr>
+<tr><td>Disable / rollback patch</td><td><code>moccipult</code></td><td><code>moccipult patches status ID disabled</code></td></tr>
+</table>
 </div>
 
 <!-- ═══════════════════════════════════════ -->
