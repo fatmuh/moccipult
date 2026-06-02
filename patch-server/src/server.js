@@ -9,11 +9,29 @@ const appsRouter = require("./routes/apps");
 const patchesRouter = require("./routes/patches");
 const downloadsRouter = require("./routes/downloads");
 
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT, 10) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
 
+// ─── Global error handlers (prevent crash) ──────────────────────────────
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err.message);
+  // Don't crash — keep running
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("❌ Unhandled Rejection:", reason);
+  // Don't crash — keep running
+});
+
 // Initialize database
-initDatabase();
+let dbReady = false;
+try {
+  initDatabase();
+  dbReady = true;
+} catch (err) {
+  console.error("❌ Database init failed:", err.message);
+  console.error("   Server will start but database features won't work.");
+}
 
 const app = express();
 
@@ -30,6 +48,8 @@ app.get("/", (req, res) => {
     ok: true,
     service: "Moccipult Patch Server",
     version: "1.0.0",
+    storage: process.env.STORAGE_TYPE || "local",
+    database: dbReady ? "ok" : "error",
     endpoints: {
       register_app: "POST /api/v1/apps",
       list_apps: "GET /api/v1/apps",
@@ -61,24 +81,32 @@ app.use((err, req, res, _next) => {
 });
 
 // Start server
-app.listen(PORT, HOST, () => {
+const server = app.listen(PORT, HOST, () => {
   console.log(`
 ╔══════════════════════════════════════════════════╗
 ║                                                  ║
 ║    __  _______  ____________________  __  ____    ║
-║   /  |/  / __ \/ ____/ ____/  _/ __ \/ / / / /   ║
+║   /  |/  / __ / ____/ ____/  _/ __ / / / / /   ║
 ║  / /|_/ / / / / /   / /    / // /_/ / / / / /    ║
 ║ / /  / / /_/ / /___/ /____/ // ____/ /_/ / /     ║
-║/_/  /_/\____/\____/\____/___/_/    \____/__/     ║
+║/_/  /_/____/____/____/___/_/    ____/__/     ║
 ║                                                  ║
 ║    Patch Server v1.0.0                           ║
 ║    Server:  http://${HOST}:${PORT}                 ║
 ║    API:     http://${HOST}:${PORT}/api/v1          ║
-║    Storage: ${process.env.STORAGE_PATH || "./patches-storage"}
+║    Storage: ${process.env.STORAGE_TYPE || "local"}                                  ║
 ║                                                  ║
 ║    Ready to receive patch requests!              ║
 ╚══════════════════════════════════════════════════╝
   `);
+});
+
+server.on("error", (err) => {
+  console.error("❌ Server error:", err.message);
+  if (err.code === "EADDRINUSE") {
+    console.error(`   Port ${PORT} is already in use.`);
+  }
+  // Don't exit — let Docker handle restart
 });
 
 module.exports = app;

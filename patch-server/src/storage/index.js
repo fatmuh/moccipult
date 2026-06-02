@@ -1,25 +1,7 @@
 /**
  * Storage Factory
  * 
- * Picks the right storage adapter based on STORAGE_TYPE env var.
- * 
- *   STORAGE_TYPE=local  → Local filesystem (default)
- *   STORAGE_TYPE=s3     → S3-compatible object storage
- * 
- * Environment Variables:
- * 
- * Local:
- *   STORAGE_PATH   — Local directory (default: ./patches-storage)
- *   SERVER_URL     — Server URL for generating download URLs
- * 
- * S3:
- *   S3_ENDPOINT    — e.g. https://s3.amazonaws.com
- *   S3_REGION      — e.g. us-east-1
- *   S3_BUCKET      — Bucket name
- *   S3_ACCESS_KEY  — Access key
- *   S3_SECRET_KEY  — Secret key
- *   S3_PUBLIC_URL  — (optional) Public download URL
- *   S3_PREFIX      — (optional) Key prefix e.g. "patches/"
+ * Gracefully handles missing config — falls back to local if S3 fails.
  */
 
 const LocalStorage = require("./local");
@@ -30,10 +12,37 @@ const STORAGE_TYPE = (process.env.STORAGE_TYPE || "local").toLowerCase();
 let storage;
 
 switch (STORAGE_TYPE) {
-  case "s3":
-    storage = new S3Storage();
-    console.log(`📦 Storage: S3 (${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET})`);
+  case "s3": {
+    const missing = [];
+    if (!process.env.S3_ENDPOINT) missing.push("S3_ENDPOINT");
+    if (!process.env.S3_BUCKET) missing.push("S3_BUCKET");
+    if (!process.env.S3_ACCESS_KEY) missing.push("S3_ACCESS_KEY");
+    if (!process.env.S3_SECRET_KEY) missing.push("S3_SECRET_KEY");
+
+    if (missing.length > 0) {
+      console.error(`❌ S3 storage enabled but missing: ${missing.join(", ")}`);
+      console.error("   Falling back to local storage.");
+      storage = new LocalStorage(
+        process.env.STORAGE_PATH || "./patches-storage",
+        process.env.SERVER_URL || "http://localhost:3000"
+      );
+      console.log(`📦 Storage: Local (fallback)`);
+    } else {
+      try {
+        storage = new S3Storage();
+        console.log(`📦 Storage: S3 (${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET})`);
+      } catch (err) {
+        console.error(`❌ S3 storage init failed: ${err.message}`);
+        console.error("   Falling back to local storage.");
+        storage = new LocalStorage(
+          process.env.STORAGE_PATH || "./patches-storage",
+          process.env.SERVER_URL || "http://localhost:3000"
+        );
+        console.log(`📦 Storage: Local (fallback)`);
+      }
+    }
     break;
+  }
 
   case "local":
   default:
