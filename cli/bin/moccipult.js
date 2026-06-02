@@ -527,9 +527,10 @@ program
         }
       }
       const pythonCmd = process.platform === "win32" ? "py" : "python3";
+      const execOpts = { stdio: "pipe", cwd: ws, shell: true, env: { ...process.env, PYTHONIOENCODING: "utf-8" } };
       execSync(
         `${pythonCmd} "${patchScript}" --shorebird-path "${sbDir}" --updater-path "${upDir}" --target-url "${serverUrl}"`,
-        { stdio: "pipe" }
+        execOpts
       );
       spinner3.succeed(`URLs patched to ${serverUrl}`);
 
