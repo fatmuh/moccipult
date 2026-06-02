@@ -667,7 +667,7 @@ program
 
     // Server status
     try {
-      const health = await api("GET", "/");
+      const health = await api("GET", "/health");
       console.log(chalk.green("  ✅ Server:"), getServer());
       console.log(chalk.dim("  Service:"), health.service);
       console.log(chalk.dim("  Version:"), health.version);
