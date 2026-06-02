@@ -139,6 +139,7 @@ code{font-family:var(--font-mono);font-size:13.5px}
 <div class="nav-section-title">Memulai</div>
 <div class="nav-item active" data-page="intro"><span class="icon">🏠</span> Pengenalan</div>
 <div class="nav-item" data-page="quickstart"><span class="icon">🚀</span> Quick Start</div>
+<div class="nav-item" data-page="app-id"><span class="icon">🔑</span> Dapatkan App ID</div>
 <div class="nav-item" data-page="flutter"><span class="icon">💙</span> Integrasi Flutter</div>
 </div>
 
@@ -334,6 +335,231 @@ moccipult patches upload -f patch.bin</code></pre>
   File Size:    2.5 KB</code></pre>
 </div>
 </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PAGE: DAPATKAN APP ID                    -->
+<!-- ═══════════════════════════════════════ -->
+<div class="page" id="page-app-id">
+<h2>Dapatkan App ID & Release ID</h2>
+<p class="subtitle">Langkah demi langkah cara mendapatkan App ID dan Release ID untuk integrasi ke Flutter app.</p>
+
+<div class="alert alert-info">
+<span class="alert-icon">ℹ️</span>
+<div><strong>App ID</strong> dipakai di Flutter (<code class="inline-code">main.dart</code>), <strong>Release ID</strong> dipakai saat upload patch via CLI.</div>
+</div>
+
+<h3>Cara 1: Menggunakan CLI (Direkomendasikan)</h3>
+
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>Download CLI</h4>
+<p>Download <code class="inline-code">moccipult</code> dari <a href="https://github.com/fatmuh/moccipult/releases" target="_blank">GitHub Releases</a> sesuai OS kamu.</p>
+<pre><code># Contoh di Windows
+# Download moccipult-windows.exe, taruh di folder project kamu</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>Set server URL</h4>
+<p>Hubungkan CLI ke server Moccipult kamu. Minta URL server ke lead/devops tim kamu.</p>
+<pre><code>moccipult config server https://patches.yourdomain.com
+
+# Output:
+# ✅ Config set: server = https://patches.yourdomain.com</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">3</div>
+<div class="step-content">
+<h4>Cek koneksi ke server</h4>
+<pre><code>moccipult status
+
+# Output kalau berhasil:
+# ✅ Server: https://patches.yourdomain.com
+# Service: Moccipult Patch Server
+# Version: 1.0.0</code></pre>
+<div class="alert alert-warning">
+<span class="alert-icon">⚠️</span>
+<div>Kalau muncul <strong>❌ Server (offline)</strong>, cek apakah URL server sudah benar dan server sedang jalan.</div>
+</div>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">4</div>
+<div class="step-content">
+<h4>Jalankan <code class="inline-code">moccipult init</code></h4>
+<p>Ini akan membuat App baru dan Release baru secara interaktif.</p>
+<pre><code>moccipult init
+
+# CLI akan menanyakan:
+📱 App name: MyApp                 ← isi nama app kamu
+📦 Package name: com.example.app  ← isi package name Flutter kamu
+📱 Platform: android              ← pilih android atau ios
+🏷️  Version: 1.0.0                ← sesuaikan dengan versi di pubspec.yaml
+📢 Channel: stable                ← pilih stable atau beta</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">5</div>
+<div class="step-content">
+<h4>Simpan App ID dan Release ID</h4>
+<p>Setelah init selesai, akan muncul output seperti ini:</p>
+<pre><code>✅ Setup complete!
+
+  Summary:
+  ─────────────────────────────────
+  App ID:      a1b2c3d4-e5f6-7890-abcd-ef1234567890
+  Release ID:  x1y2z3w4-v5u6-7890-abcd-ef1234567890
+  Config:      .moccipult.json
+
+  Next steps:
+  1. Build your Flutter app
+  2. Generate a patch file
+  3. Run: moccipult patches upload -r x1y2z3w4-v5u6-7890-abcd-ef1234567890 -f patch.bin</code></pre>
+
+<div class="alert alert-success">
+<span class="alert-icon">✅</span>
+<div>
+<p><strong>Catat kedua ID ini!</strong></p>
+<ul style="margin-top:8px;padding-left:20px">
+<li><strong>App ID</strong> → dipakai di <code class="inline-code">main.dart</code> Flutter</li>
+<li><strong>Release ID</strong> → dipakai saat upload patch via CLI</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">6</div>
+<div class="step-content">
+<h4>File .moccipult.json otomatis dibuat</h4>
+<p>CLI otomatis membuat file ini di current directory:</p>
+<pre><code>// .moccipult.json
+{
+  "appId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "releaseId": "x1y2z3w4-v5u6-7890-abcd-ef1234567890",
+  "appName": "MyApp",
+  "version": "1.0.0",
+  "platform": "android",
+  "channel": "stable"
+}</code></pre>
+<p>Jadi kamu tidak perlu menghafal ID-nya. Cukup buka file ini kalau lupa.</p>
+</div>
+</div>
+
+<h3>Cara 2: Menggunakan API Langsung</h3>
+<p>Kalau kamu tidak bisa pakai CLI (misal di CI/CD), bisa pakai API langsung.</p>
+
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>Buat App</h4>
+<pre><code>curl -X POST https://patches.yourdomain.com/api/v1/apps \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "MyApp",
+    "package_name": "com.example.app",
+    "platform": "android"
+  }'
+
+// Response:
+{
+  "ok": true,
+  "app": {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",  ← ini App ID
+    "name": "MyApp",
+    "package_name": "com.example.app",
+    "platform": "android"
+  }
+}</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>Buat Release</h4>
+<p>Gunakan <strong>App ID</strong> dari langkah sebelumnya.</p>
+<pre><code>curl -X POST https://patches.yourdomain.com/api/v1/releases \
+  -H "Content-Type: application/json" \
+  -d '{
+    "app_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "version": "1.0.0",
+    "platform": "android",
+    "channel": "stable"
+  }'
+
+// Response:
+{
+  "ok": true,
+  "release": {
+    "id": "x1y2z3w4-v5u6-7890-abcd-ef1234567890",  ← ini Release ID
+    "version": "1.0.0",
+    "platform": "android",
+    "channel": "stable"
+  }
+}</code></pre>
+</div>
+</div>
+
+<h3>Cara 3: Cek ID yang Sudah Ada</h3>
+<p>Kalau app sudah pernah didaftarkan tapi kamu lupa ID-nya:</p>
+
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>List semua app</h4>
+<pre><code>moccipult apps list
+
+# Output:
+✔ Found 2 app(s)
+
+  Apps:
+  ────────────────────────────────────────────────────────
+  a1b2c3d4...  MyApp                      android     2024-01-01
+  f9e8d7c6...  OtherApp                   android     2024-01-02
+  ────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>List releases dari app tertentu</h4>
+<pre><code>moccipult releases list -a a1b2c3d4-e5f6-7890-abcd-ef1234567890
+
+# Output:
+✔ Found 2 release(s)
+
+  Releases:
+  ────────────────────────────────────────────────────────────────
+  x1y2z3w4...  v1.0.0       android     stable       2024-01-01
+  m5n6o7p8...  v1.1.0       android     stable       2024-02-01
+  ────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+
+<h3>Yang Mana Dipakai di Mana?</h3>
+<table class="params">
+<tr><th>ID</th><th>Dipakai di</th><th>Contoh</th></tr>
+<tr><td><code>App ID</code></td><td><code>main.dart</code> Flutter</td><td><code>MoccipultUpdater(appId: 'a1b2c3d4-...')</code></td></tr>
+<tr><td><code>Release ID</code></td><td>CLI saat upload patch</td><td><code>moccipult patches upload -r x1y2z3w4-... -f patch.bin</code></td></tr>
+<tr><td><code>Patch ID</code></td><td>CLI saat disable/rollback</td><td><code>moccipult patches status p1q2r3-... disabled</code></td></tr>
+</table>
+
+<div class="alert alert-info">
+<span class="alert-icon">💡</span>
+<div><strong>Tips:</strong> Satu app bisa punya banyak release (misal v1.0.0, v1.1.0, v2.0.0). Setiap release punya patch-nya sendiri. Jadi kalau ada user yang masih pakai v1.0.0 dan ada yang sudah v1.1.0, keduanya bisa dapat patch yang berbeda.</div>
+</div>
+
 </div>
 
 <!-- ═══════════════════════════════════════ -->
