@@ -319,7 +319,7 @@ jobs:
           name: installer-linux
           path: installer/linux/output/*.deb
 
-      # ── macOS Installer (.pkg) ──
+      # ── macOS Installers (.pkg + .dmg) ──
       - name: Build macOS .pkg installer
         if: matrix.installer == 'macos'
         run: |
@@ -327,12 +327,29 @@ jobs:
           chmod +x installer/macos/scripts/postinstall
           bash installer/macos/build-pkg.sh "${{ needs.auto-tag.outputs.version }}" "dist/${{ matrix.binary }}" "x86_64"
 
-      - name: Upload macOS installer
+      - name: Build macOS .dmg
+        if: matrix.installer == 'macos'
+        run: |
+          DMG_NAME="moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64"
+          DMG_DIR="/tmp/dmg-staging"
+          rm -rf "$DMG_DIR"
+          mkdir -p "$DMG_DIR"
+          cp "dist/${{ matrix.binary }}" "$DMG_DIR/moccipult"
+          chmod +x "$DMG_DIR/moccipult"
+          # Create Applications symlink
+          ln -s /Applications "$DMG_DIR/Applications"
+          # Create DMG
+          hdiutil create -volname "Moccipult" -srcfolder "$DMG_DIR" -ov -format UDZO "installer/macos/output/$DMG_NAME.dmg"
+          rm -rf "$DMG_DIR"
+
+      - name: Upload macOS installers
         if: matrix.installer == 'macos'
         uses: actions/upload-artifact@v4
         with:
           name: installer-macos
-          path: installer/macos/output/*.pkg
+          path: |
+            installer/macos/output/*.pkg
+            installer/macos/output/*.dmg
 
   # ──────────────────────────────────────────────
   # Job 6: Create GitHub Release
@@ -376,6 +393,7 @@ jobs:
             | Windows Setup | `moccipult-setup-${{ needs.auto-tag.outputs.version }}.exe` |
             | Linux DEB | `moccipult_${{ needs.auto-tag.outputs.version }}_amd64.deb` |
             | macOS PKG | `moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64.pkg` |
+            | macOS DMG | `moccipult-${{ needs.auto-tag.outputs.version }}-macos-x86_64.dmg` |
 
             ### Portable Binaries
             | Platform | File |
@@ -405,6 +423,7 @@ jobs:
             installers/*.exe
             installers/*.deb
             installers/*.pkg
+            installers/*.dmg
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
