@@ -30,7 +30,6 @@ ArchitecturesInstallIn64BitMode=x64compatible
 
 ; Add to PATH automatically
 [Languages]
-Name: "indonesian"; MessagesFile: "compiler:Languages\Indonesian.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
