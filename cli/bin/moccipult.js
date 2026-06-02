@@ -536,7 +536,7 @@ program
 
       if (opts.skipBuild) {
         console.log(chalk.yellow("\n  ⚠️  --skip-build: skipping build. Build manually with:"));
-        console.log(chalk.dim(`    cd ${sbDir} && dart compile exe bin/shorebird.dart -o shorebird`));
+        console.log(chalk.dim(`    cd ${sbDir} && dart compile exe ${entryPoint} -o shorebird`));
         return;
       }
 
@@ -545,12 +545,59 @@ program
       execSync("cargo build --release", { stdio: "pipe", cwd: upDir });
       spinner4.succeed("Updater built");
 
-      // Build CLI
+      // Find entry point — Shorebird repo structure may vary across versions
+      const possibleEntryPoints = [
+        "bin/shorebird.dart",
+        "bin/shorebird.dart", 
+        "packages/shorebird_cli/bin/shorebird.dart",
+        "packages/shorebird_cli/bin/main.dart",
+      ];
+      let entryPoint = null;
+      for (const ep of possibleEntryPoints) {
+        if (fs.existsSync(path.join(sbDir, ep))) {
+          entryPoint = ep;
+          break;
+        }
+      }
+      if (!entryPoint) {
+        // Try to find any main entry point
+        const binDir = path.join(sbDir, "bin");
+        if (fs.existsSync(binDir)) {
+          const files = fs.readdirSync(binDir).filter(f => f.endsWith(".dart"));
+          if (files.length > 0) {
+            entryPoint = `bin/${files[0]}`;
+            console.log(chalk.dim(`  Found entry point: ${entryPoint}`));
+          }
+        }
+        // Check packages/shorebird_cli too
+        const cliBinDir = path.join(sbDir, "packages", "shorebird_cli", "bin");
+        if (!entryPoint && fs.existsSync(cliBinDir)) {
+          const files = fs.readdirSync(cliBinDir).filter(f => f.endsWith(".dart"));
+          if (files.length > 0) {
+            entryPoint = `packages/shorebird_cli/bin/${files[0]}`;
+            console.log(chalk.dim(`  Found entry point: ${entryPoint}`));
+          }
+        }
+      }
+      if (!entryPoint) {
+        throw new Error(
+          "Could not find Shorebird CLI entry point.\n" +
+          "The repo structure may have changed.\n" +
+          "Please report this issue: https://github.com/fatmuh/moccipult/issues"
+        );
+      }
+      console.log(chalk.dim(`  Entry point: ${entryPoint}`));
+
       const spinner5 = ora("Building Shorebird CLI...").start();
-      execSync("dart pub get", { stdio: "pipe", cwd: sbDir });
+      // Run pub get at root and sub-packages
+      execSync("dart pub get", { stdio: "pipe", cwd: sbDir, shell: true });
+      const cliPkg = path.join(sbDir, "packages", "shorebird_cli");
+      if (fs.existsSync(cliPkg)) {
+        execSync("dart pub get", { stdio: "pipe", cwd: cliPkg, shell: true });
+      }
       const ext = process.platform === "win32" ? ".exe" : "";
       const sbBin = path.join(sbDir, `shorebird${ext}`);
-      execSync(`dart compile exe bin/shorebird.dart -o "${sbBin}"`, { stdio: "pipe", cwd: sbDir });
+      execSync(`dart compile exe ${entryPoint} -o "${sbBin}"`, { stdio: "pipe", cwd: sbDir });
       spinner5.succeed("Shorebird CLI built");
 
       // Install to moccipult bin
