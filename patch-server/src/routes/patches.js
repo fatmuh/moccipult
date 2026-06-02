@@ -9,24 +9,18 @@ const { getDb } = require("../database");
 
 require("dotenv").config();
 
-const STORAGE_PATH = process.env.STORAGE_PATH || "./patches-storage";
-const SERVER_URL = process.env.SERVER_URL || "http://localhost:3000";
+const storage = require("../storage");
 
-// Ensure storage directory exists
-if (!fs.existsSync(STORAGE_PATH)) {
-  fs.mkdirSync(STORAGE_PATH, { recursive: true });
-}
-
-// Multer config — store temporarily, then we move to final location
+// Multer config — store temporarily in /tmp, then storage adapter handles final location
 const upload = multer({
-  dest: path.join(STORAGE_PATH, "tmp"),
+  dest: path.join(require("os").tmpdir(), "moccipult-uploads"),
   limits: { fileSize: 500 * 1024 * 1024 }, // 500MB max
 });
 
 // =============================================
 // POST /api/v1/patches/upload — Upload a patch
 // =============================================
-router.post("/patches/upload", upload.single("file"), (req, res) => {
+router.post("/patches/upload", upload.single("file"), async (req, res) => {
   const { release_id } = req.body;
 
   if (!req.file) {
@@ -41,7 +35,6 @@ router.post("/patches/upload", upload.single("file"), (req, res) => {
   // Verify release exists
   const release = db.prepare("SELECT * FROM releases WHERE id = ?").get(release_id);
   if (!release) {
-    // Clean up temp file
     fs.unlinkSync(req.file.path);
     return res.status(404).json({ error: "Release not found" });
   }
@@ -59,22 +52,21 @@ router.post("/patches/upload", upload.single("file"), (req, res) => {
 
   const patchId = uuidv4();
 
-  // Move file to final location
-  const finalDir = path.join(STORAGE_PATH, release_id);
-  if (!fs.existsSync(finalDir)) {
-    fs.mkdirSync(finalDir, { recursive: true });
-  }
-  const finalFilename = `patch_${patchNumber}_${patchId}.bin`;
-  const finalPath = path.join(finalDir, finalFilename);
-  fs.renameSync(req.file.path, finalPath);
-
-  const downloadUrl = `${SERVER_URL}/downloads/${release_id}/${finalFilename}`;
+  // Storage key: <release_id>/patch_<number>_<id>.bin
+  const storageKey = `${release_id}/patch_${patchNumber}_${patchId}.bin`;
 
   try {
+    // Upload to storage (local or S3)
+    const result = await storage.upload(storageKey, req.file.path);
+    const downloadUrl = result.url;
+
+    // Clean up temp file
+    try { fs.unlinkSync(req.file.path); } catch {}
+
     db.prepare(
       `INSERT INTO patches (id, release_id, patch_number, download_url, file_hash, file_size, file_path, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, 'active')`
-    ).run(patchId, release_id, patchNumber, downloadUrl, fileHash, fileSize, finalPath);
+    ).run(patchId, release_id, patchNumber, downloadUrl, fileHash, fileSize, result.storedPath || storageKey);
 
     const patch = db.prepare("SELECT * FROM patches WHERE id = ?").get(patchId);
 
@@ -93,15 +85,13 @@ router.post("/patches/upload", upload.single("file"), (req, res) => {
     });
   } catch (err) {
     console.error("Error saving patch:", err);
-    // Clean up
-    if (fs.existsSync(finalPath)) fs.unlinkSync(finalPath);
-    res.status(500).json({ error: "Failed to save patch" });
+    try { fs.unlinkSync(req.file.path); } catch {}
+    res.status(500).json({ error: "Failed to save patch: " + err.message });
   }
 });
 
 // =============================================
 // POST /api/v1/patches/check — Check for updates
-// Mimics the Shorebird protocol
 // =============================================
 router.post("/patches/check", (req, res) => {
   const { release_id, current_patch_number, app_id, version, platform, channel } = req.body;

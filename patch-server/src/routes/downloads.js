@@ -5,14 +5,15 @@ const { getDb } = require("../database");
 
 require("dotenv").config();
 
-const STORAGE_PATH = process.env.STORAGE_PATH || "./patches-storage";
+const storage = require("../storage");
+const STORAGE_TYPE = (process.env.STORAGE_TYPE || "local").toLowerCase();
 
 const router = express.Router();
 
 // =============================================
 // GET /downloads/:release_id/:filename — Download a patch file
 // =============================================
-router.get("/downloads/:release_id/:filename", (req, res) => {
+router.get("/downloads/:release_id/:filename", async (req, res) => {
   const { release_id, filename } = req.params;
 
   const db = getDb();
@@ -31,7 +32,16 @@ router.get("/downloads/:release_id/:filename", (req, res) => {
     return res.status(404).json({ error: "Patch file not found or not active" });
   }
 
-  const filePath = path.join(STORAGE_PATH, release_id, filename);
+  const key = `${release_id}/${filename}`;
+
+  if (STORAGE_TYPE === "s3") {
+    // S3: Redirect to the public object URL
+    const url = storage.getUrl(key);
+    return res.redirect(url);
+  }
+
+  // Local: Stream file from disk
+  const filePath = storage.getFilePath(key);
 
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ error: "File not found on disk" });
