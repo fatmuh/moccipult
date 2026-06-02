@@ -98,12 +98,12 @@ class MoccipultUpdater {
   /// Called for status updates
   void Function(String status)? onStatusChanged;
 
-  final String appVersion;
+  String appVersion;
 
   MoccipultUpdater({
     required this.serverUrl,
     required this.appId,
-    required this.appVersion,
+    this.appVersion = '',
     this.platform = 'android',
     this.channel = 'stable',
     this.timeout = const Duration(seconds: 30),
@@ -120,6 +120,13 @@ class MoccipultUpdater {
       final config = await MoccipultConfig.load();
       final currentPatchNumber = config?.currentPatchNumber ?? 0;
 
+      if (appVersion.isEmpty) {
+        throw Exception(
+          'moccipult: appVersion is required.\n'
+          'Add appVersion to MoccipultUpdater:\n'
+          '  MoccipultUpdater(serverUrl: ..., appId: ..., appVersion: "1.0.0")',
+        );
+      }
       final version = appVersion;
 
       // Check server
