@@ -506,7 +506,26 @@ program
 
       // Patch URLs
       const spinner3 = ora(`Patching URLs to ${serverUrl}...`).start();
-      const patchScript = path.join(__dirname, "..", "..", "patch_repos.py");
+      // Write patch_repos.py to temp location (needed because pkg binary can't bundle it)
+      const tmpPatchScript = path.join(os.tmpdir(), "moccipult-patch-repos.py");
+      const embeddedPatchScript = path.join(__dirname, "..", "..", "patch_repos.py");
+      let patchScript;
+      if (fs.existsSync(embeddedPatchScript)) {
+        patchScript = embeddedPatchScript;
+      } else {
+        // Running as compiled binary — download from GitHub
+        const spinnerDl = ora("Downloading patch script...").start();
+        try {
+          const resp = await fetch("https://raw.githubusercontent.com/fatmuh/moccipult/master/patch_repos.py");
+          const scriptContent = await resp.text();
+          fs.writeFileSync(tmpPatchScript, scriptContent, "utf-8");
+          patchScript = tmpPatchScript;
+          spinnerDl.succeed("Patch script downloaded");
+        } catch (dlErr) {
+          spinnerDl.fail("Failed to download patch script");
+          throw dlErr;
+        }
+      }
       const pythonCmd = process.platform === "win32" ? "py" : "python3";
       execSync(
         `${pythonCmd} "${patchScript}" --shorebird-path "${sbDir}" --updater-path "${upDir}" --target-url "${serverUrl}"`,
