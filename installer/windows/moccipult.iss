@@ -17,10 +17,10 @@ AppSupportURL={#AppURL}
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 AllowNoIcons=yes
-LicenseFile=LICENSE.txt
+LicenseFile=
 OutputDir=output
 OutputBaseFilename=moccipult-setup-{#AppVersion}
-SetupIconFile=icon.ico
+
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -37,7 +37,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Source: "bin\moccipult.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "bin\shorebird.exe"; DestDir: "{app}\bin"; Flags: ignoreversion skipifsourcedoesntexist
 Source: "setup-shorebird.bat"; DestDir: "{app}"; Flags: ignoreversion
-Source: "README.txt"; DestDir: "{app}"; Flags: ignoreversion isreadme
+
 
 [Icons]
 Name: "{group}\{#AppName} CLI"; Filename: "cmd.exe"; Parameters: "/k ""set PATH={app}\bin;%PATH%"""
