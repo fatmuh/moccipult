@@ -571,5 +571,24 @@ program
 program.parse(process.argv);
 
 if (!process.argv.slice(2).length) {
+  console.log(chalk.bold.cyan(BANNER));
+  console.log();
   program.outputHelp();
+  console.log();
+  console.log(chalk.yellow("  Quick start:"));
+  console.log(chalk.white("  moccipult config server https://your-server.com"));
+  console.log(chalk.white("  moccipult init"));
+  console.log(chalk.white("  moccipult patches upload -r <RELEASE_ID> -f patch.bin"));
+  console.log();
+  waitForKeypress();
+}
+
+// ─── Keep window open on Windows when double-clicked ────────────────────────
+function waitForKeypress() {
+  if (process.platform === "win32") {
+    console.log(chalk.dim("\n  Press any key to exit..."));
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.once("data", () => process.exit(0));
+  }
 }
