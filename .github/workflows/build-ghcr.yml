@@ -285,7 +285,7 @@ jobs:
       - name: Install Inno Setup (Windows)
         if: matrix.installer == 'windows'
         run: |
-          choco install innosetup --version=6.3.3 --no-progress -y
+          choco install innosetup --no-progress -y
         shell: pwsh
 
       - name: Build Windows .exe installer
