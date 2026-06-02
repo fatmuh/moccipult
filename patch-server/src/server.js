@@ -8,6 +8,7 @@ const { initDatabase } = require("./database");
 const appsRouter = require("./routes/apps");
 const patchesRouter = require("./routes/patches");
 const downloadsRouter = require("./routes/downloads");
+const docsRouter = require("./routes/docs");
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
@@ -42,25 +43,17 @@ app.use(morgan("combined"));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
-app.get("/", (req, res) => {
+// Documentation (root)
+app.use("/", docsRouter);
+
+// Health check (for monitoring / CLI)
+app.get("/health", (req, res) => {
   res.json({
     ok: true,
     service: "Moccipult Patch Server",
     version: "1.0.0",
     storage: process.env.STORAGE_TYPE || "local",
     database: dbReady ? "ok" : "error",
-    endpoints: {
-      register_app: "POST /api/v1/apps",
-      list_apps: "GET /api/v1/apps",
-      create_release: "POST /api/v1/releases",
-      list_releases: "GET /api/v1/releases?app_id=...",
-      upload_patch: "POST /api/v1/patches/upload",
-      check_patch: "POST /api/v1/patches/check",
-      list_patches: "GET /api/v1/patches?release_id=...",
-      update_status: "PATCH /api/v1/patches/:id/status",
-      download: "GET /downloads/:release_id/:filename",
-    },
   });
 });
 
