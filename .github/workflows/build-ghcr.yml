@@ -255,10 +255,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download all artifacts
+      - name: Download CLI artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
+          pattern: moccipult-*
+          merge-multiple: true
 
       - name: List files
         run: find dist -type f -ls
@@ -292,10 +294,10 @@ jobs:
             moccipult patches upload -r <RELEASE_ID> -f patch.bin
             ```
           files: |
-            dist/moccipult-windows/moccipult-windows.exe
-            dist/moccipult-linux/moccipult-linux
-            dist/moccipult-macos/moccipult-macos
-            dist/moccipult-macos-arm/moccipult-macos-arm
+            dist/moccipult-windows.exe
+            dist/moccipult-linux
+            dist/moccipult-macos
+            dist/moccipult-macos-arm
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -4,6 +4,6 @@ patches-storage/
 *.db
 *.db-wal
 *.db-shm
-.env.local
+.env
 *.log
 cli/dist/

@@ -1,5 +1,10 @@
 # Docker Compose for Dokploy / Production
 # Pulls pre-built image from GHCR
+# 
+# Setup:
+#   1. Copy .env.example → .env
+#   2. Fill in your S3_ACCESS_KEY and S3_SECRET_KEY
+#   3. Deploy
 
 version: "3.9"
 
@@ -10,29 +15,10 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     volumes:
       - moccipult-data:/app/data
-      # Only needed if STORAGE_TYPE=local
-      - moccipult-storage:/app/patches-storage
-    environment:
-      - PORT=3000
-      - HOST=0.0.0.0
-      - DB_PATH=/app/data/patches.db
-      # ── Storage Backend ──
-      # Set to "s3" for object storage, "local" for filesystem
-      - STORAGE_TYPE=${STORAGE_TYPE:-local}
-      - STORAGE_PATH=/app/patches-storage
-      - SERVER_URL=${SERVER_URL:-https://patches.yourdomain.com}
-      # ── S3 Object Storage (uncomment all if STORAGE_TYPE=s3) ──
-      # - S3_ENDPOINT=${S3_ENDPOINT}
-      # - S3_REGION=${S3_REGION:-auto}
-      # - S3_BUCKET=${S3_BUCKET}
-      # - S3_ACCESS_KEY=${S3_ACCESS_KEY}
-      # - S3_SECRET_KEY=${S3_SECRET_KEY}
-      # - S3_PUBLIC_URL=${S3_PUBLIC_URL}
-      # - S3_PREFIX=patches
-      # ── Auth ──
-      - API_KEY=${API_KEY:-}
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 30s
@@ -42,6 +28,4 @@ services:
 
 volumes:
   moccipult-data:
-    driver: local
-  moccipult-storage:
     driver: local

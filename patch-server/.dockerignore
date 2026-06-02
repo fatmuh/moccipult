@@ -1,5 +1,5 @@
 node_modules/
 data/
-patches-storage/tmp/
+patches-storage/
 *.log
-.env.local
+.env
