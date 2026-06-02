@@ -248,16 +248,46 @@ code{font-family:var(--font-mono);font-size:13.5px}
 <h2>Quick Start</h2>
 <p class="subtitle">Dari nol sampai bisa push patch dalam 5 menit.</p>
 
-<h3>Setup Awal (Sekali Saja)</h3>
+<h3>Step 1: Install Moccipult</h3>
 
-<div class="step">
-<div class="step-num">1</div>
-<div class="step-content">
-<h4>Download CLI</h4>
-<p>Download <code class="inline-code">moccipult</code> dari <a href="https://github.com/fatmuh/moccipult/releases">GitHub Releases</a> sesuai OS kamu.</p>
-<pre><code># Windows: download moccipult-windows.exe
-# macOS:   download moccipult-macos atau moccipult-macos-arm
-# Linux:   download moccipult-linux</code></pre>
+<div class="card-grid">
+<div class="card" style="border-color:rgba(74,222,128,.3)">
+<div class="card-header">
+<div class="card-icon" style="background:var(--green-bg)">📥</div>
+<h4>Installer (Recommended)</h4>
+</div>
+<p>Download installer dari <a href="https://github.com/fatmuh/moccipult/releases">GitHub Releases</a>. Otomatis install + tambah ke PATH.</p>
+<table class="params" style="margin-top:12px">
+<tr><td>🪟 Windows</td><td><code>moccipult-setup-x.x.x.exe</code></td></tr>
+<tr><td>🐧 Linux</td><td><code>moccipult_x.x.x_amd64.deb</code></td></tr>
+<tr><td>🍎 macOS</td><td><code>moccipult-x.x.x-macos.pkg</code></td></tr>
+</table>
+<pre><code># Windows: double-click moccipult-setup.exe, next-next-finish
+
+# Linux:
+sudo dpkg -i moccipult_*.deb
+
+# macOS:
+open moccipult-*.pkg   # ikuti installer wizard</code></pre>
+</div>
+<div class="card" style="border-color:rgba(34,211,238,.3)">
+<div class="card-header">
+<div class="card-icon" style="background:var(--cyan-bg)">📦</div>
+<h4>Portable Binary</h4>
+</div>
+<p>Download binary langsung, taruh mana aja. Tanpa install wizard.</p>
+<table class="params" style="margin-top:12px">
+<tr><td>🪟 Windows</td><td><code>moccipult-windows.exe</code></td></tr>
+<tr><td>🐧 Linux</td><td><code>moccipult-linux</code></td></tr>
+<tr><td>🍎 macOS</td><td><code>moccipult-macos</code></td></tr>
+<tr><td>🍎 macOS ARM</td><td><code>moccipult-macos-arm</code></td></tr>
+</table>
+<pre><code># Linux/macOS:
+chmod +x moccipult-*
+./moccipult-* status
+
+# Windows:
+moccipult-windows.exe status</code></pre>
 </div>
 </div>
 
@@ -266,9 +296,7 @@ code{font-family:var(--font-mono);font-size:13.5px}
 <div class="step-content">
 <h4>Set Server URL</h4>
 <p>Hubungkan CLI ke server Moccipult.</p>
-<div class="code-block">
 <pre><code>moccipult config server https://patches.yourdomain.com</code></pre>
-</div>
 </div>
 </div>
 
