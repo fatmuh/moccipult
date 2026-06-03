@@ -223,7 +223,8 @@ class MoccipultUpdater {
     final client = http.Client();
 
     try {
-      final response = await client.send(http.Request('GET', url).timeout(timeout));
+      final request = http.Request('GET', url);
+      final response = await client.send(request).timeout(timeout);
 
       if (response.statusCode != 200) {
         throw Exception('Download failed: ${response.statusCode}');
