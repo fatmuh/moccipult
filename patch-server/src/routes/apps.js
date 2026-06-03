@@ -7,8 +7,9 @@ const { getDb } = require("../database");
 // POST /api/v1/apps — Register a new app
 // =============================================
 router.post("/apps", (req, res) => {
-  const name = req.body.name || req.body.displayName;
-  const { package_name, platform, organizationId, displayName } = req.body;
+  // Support both Moccipult format {name, package_name} and Shorebird format {display_name, organization_id}
+  const name = req.body.name || req.body.display_name || req.body.displayName;
+  const { package_name, platform, organizationId, display_name } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: "App name is required" });

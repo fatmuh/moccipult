@@ -115,31 +115,7 @@ router.get("/organizations", (req, res) => {
   });
 });
 
-// POST /api/v1/apps — Create app (Shorebird format)
-// Shorebird sends: { organizationId: int, displayName: string }
-// Expects response: { id: string, display_name: string }
-router.post("/apps", (req, res) => {
-  const db = getDb();
-  const { display_name, organization_id } = req.body || {};
-
-  if (!display_name) {
-    return res.status(400).json({ message: "display_name is required" });
-  }
-
-  const id = uuidv4();
-  try {
-    db.prepare(
-      `INSERT INTO apps (id, name, package_name, platform) VALUES (?, ?, '', 'android')`
-    ).run(id, display_name);
-
-    res.json({ id, display_name });
-  } catch (err) {
-    if (err.message.includes("UNIQUE")) {
-      return res.status(409).json({ message: "App already exists" });
-    }
-    res.status(500).json({ message: err.message });
-  }
-});
+// NOTE: POST /api/v1/apps is handled by apps.js (which now supports both formats)
 
 // GET /api/v1/apps — List apps (Shorebird AppMetadata format)
 router.get("/apps", (req, res) => {
