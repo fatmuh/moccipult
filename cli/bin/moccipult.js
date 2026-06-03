@@ -462,7 +462,11 @@ program
           path.join(process.env.USERPROFILE || "", "AppData", "Local", "shorebird"),
         ];
         for (const p of possiblePaths) {
-          if (fs.existsSync(path.join(p, "bin", "shorebird")) || fs.existsSync(path.join(p, "bin", "shorebird.exe"))) {
+          if (
+            fs.existsSync(path.join(p, "bin", "shorebird")) ||
+            fs.existsSync(path.join(p, "bin", "shorebird.exe")) ||
+            fs.existsSync(path.join(p, "bin", "shorebird.bat"))
+          ) {
             sbPath = p;
             break;
           }
@@ -490,10 +494,23 @@ program
       ok(`Shorebird found: ${sbPath}`);
 
       // ── Step 3: Verify ──
-      const ext = process.platform === "win32" ? ".exe" : "";
-      const sbBin = path.join(sbPath, "bin", `shorebird${ext}`);
-      if (!fs.existsSync(sbBin)) {
-        fail(`Binary not found: ${sbBin}`);
+      // On Windows, Shorebird installs as shorebird.bat / shorebird.ps1, NOT .exe
+      // On Unix, it's just "shorebird"
+      let sbBin;
+      const binDir = path.join(sbPath, "bin");
+      if (process.platform === "win32") {
+        // Prefer .bat, then .exe, then plain shorebird
+        const candidates = ["shorebird.bat", "shorebird.exe", "shorebird"];
+        sbBin = candidates
+          .map((c) => path.join(binDir, c))
+          .find((p) => fs.existsSync(p));
+      } else {
+        sbBin = path.join(binDir, "shorebird");
+        if (!fs.existsSync(sbBin)) sbBin = undefined;
+      }
+      if (!sbBin) {
+        fail(`Shorebird binary not found in: ${binDir}`);
+        console.log(chalk.dim("  Expected one of: shorebird.bat, shorebird.exe, shorebird"));
         return;
       }
 
