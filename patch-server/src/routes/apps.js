@@ -51,13 +51,21 @@ router.post("/apps", (req, res) => {
 router.get("/apps", (req, res) => {
   const db = getDb();
   const apps = db.prepare("SELECT * FROM apps ORDER BY created_at DESC").all();
-  // Return in Shorebird-compatible format: { apps: [...] }
+  const isoDate = (d) => d ? d.replace(' ', 'T') + 'Z' : d;
+  // Return in Shorebird AppMetadata format
   res.json({
     ok: true,
     apps: apps.map((app) => ({
       ...app,
       id: app.id,
       displayName: app.name,
+      // Shorebird AppMetadata required fields
+      app_id: app.id,
+      display_name: app.name,
+      latest_release_version: null,
+      latest_patch_number: null,
+      created_at: isoDate(app.created_at),
+      updated_at: isoDate(app.updated_at),
     })),
   });
 });

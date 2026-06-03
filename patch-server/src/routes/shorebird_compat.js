@@ -125,14 +125,15 @@ router.get("/organizations", (req, res) => {
 router.get("/apps", (req, res) => {
   const db = getDb();
   const apps = db.prepare("SELECT * FROM apps ORDER BY created_at DESC").all();
+  const isoDate = (d) => d ? d.replace(' ', 'T') + 'Z' : d;
   res.json({
     apps: apps.map((app) => ({
       app_id: app.id,
       display_name: app.name,
       latest_release_version: null,
       latest_patch_number: null,
-      created_at: app.created_at,
-      updated_at: app.updated_at,
+      created_at: isoDate(app.created_at),
+      updated_at: isoDate(app.updated_at),
     })),
   });
 });
