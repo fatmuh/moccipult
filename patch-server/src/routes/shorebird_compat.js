@@ -255,7 +255,8 @@ router.get("/apps/:appId/releases/:releaseId/artifacts", (req, res) => {
 });
 
 // ===========================================================
-// POST /api/v1/apps/:appId/releases/:releaseId/artifacts — Upload artifact
+// POST /api/v1/apps/:appId/releases/:releaseId/artifacts — Presign artifact
+// Two-step upload: step 1 = presign (no file), step 2 = upload to presigned URL
 // ===========================================================
 router.post(
   "/apps/:appId/releases/:releaseId/artifacts",
@@ -264,46 +265,106 @@ router.post(
     const { appId, releaseId } = req.params;
     const db = getDb();
 
+    // If file is in the request (legacy/curl flow), store it directly
+    if (req.file) {
+      return storeArtifact(req, res, appId, releaseId);
+    }
+
+    // Otherwise: presign step. Generate a presigned URL and return CreateReleaseArtifactResponse.
+    let releases = db.prepare("SELECT * FROM releases WHERE app_id = ?").all(appId);
+    let release = releases.find((r) => toNumericId(r.id) === parseInt(releaseId));
+    if (!release) release = releases[0];
+
+    if (!release) {
+      return res.status(404).json({ message: "Release not found" });
+    }
+
+    const arch = req.body.arch || "arm64";
+    const platform = req.body.platform || "android";
+    const hash = req.body.hash || "";
+    const size = parseInt(req.body.size) || 0;
+
+    // Presigned URL that the client will POST the file to
+    const uploadToken = crypto.randomBytes(16).toString("hex");
+    const presignedUrl = `${req.protocol}://${req.get("host")}/api/v1/uploads/${uploadToken}?appId=${appId}&releaseId=${releaseId}&arch=${arch}&platform=${platform}&hash=${encodeURIComponent(hash)}&size=${size}`;
+
+    const artifactId = Date.now();
+    res.json({
+      id: artifactId,
+      release_id: parseInt(releaseId),
+      arch: arch,
+      platform: platform,
+      hash: hash,
+      size: size,
+      url: presignedUrl,
+    });
+  }
+);
+
+// ===========================================================
+// POST /api/v1/uploads/:token — Receive file from presigned URL
+// ===========================================================
+router.post(
+  "/uploads/:token",
+  upload.single("file"),
+  async (req, res) => {
+    const { appId, releaseId, arch, platform, hash, size } = req.query;
+
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // Find release
-    let releases = db.prepare("SELECT * FROM releases WHERE app_id = ?").all(appId);
-    let release = releases.find((r) => toNumericId(r.id) === parseInt(releaseId));
-
-    if (!release) {
-      try { fs.unlinkSync(req.file.path); } catch {}
-      return res.status(404).json({ message: "Release not found" });
-    }
-
-    // Store the artifact
-    const arch = req.body.arch || "arm64";
-    const platform = req.body.platform || "android";
-    const hash = req.body.hash || "";
-    const size = req.body.size || req.file.size;
-    const storageKey = `${release.id}/release_${releaseId}_${arch}.bin`;
-
-    try {
-      const result = await storage.upload(storageKey, req.file.path);
-      try { fs.unlinkSync(req.file.path); } catch {}
-
-      // Return a presigned-style URL for upload confirmation
-      res.json({
-        id: Date.now(),
-        release_id: parseInt(releaseId),
-        arch: arch,
-        platform: platform,
-        hash: hash || "",
-        size: parseInt(size) || 0,
-        url: result.url,
-      });
-    } catch (err) {
-      try { fs.unlinkSync(req.file.path); } catch {}
-      res.status(500).json({ message: err.message });
-    }
+    // Mimic req.body for the storeArtifact helper
+    req.body = { arch, platform, hash, size };
+    return storeArtifact(req, res, appId, releaseId, /*fromPresigned*/ true);
   }
 );
+
+// Helper to store an artifact (file already in req.file)
+async function storeArtifact(req, res, appId, releaseId, fromPresigned = false) {
+  const db = getDb();
+
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  let releases = db.prepare("SELECT * FROM releases WHERE app_id = ?").all(appId);
+  let release = releases.find((r) => toNumericId(r.id) === parseInt(releaseId));
+  if (!release) release = releases[0];
+
+  if (!release) {
+    try { fs.unlinkSync(req.file.path); } catch {}
+    return res.status(404).json({ message: "Release not found" });
+  }
+
+  const arch = req.body.arch || "arm64";
+  const platform = req.body.platform || "android";
+  const hash = req.body.hash || "";
+  const size = parseInt(req.body.size) || req.file.size;
+  const storageKey = `${release.id}/release_${releaseId}_${arch}.bin`;
+
+  try {
+    const result = await storage.upload(storageKey, req.file.path);
+    try { fs.unlinkSync(req.file.path); } catch {}
+
+    if (fromPresigned) {
+      return res.json({ success: true, url: result.url });
+    }
+
+    res.json({
+      id: Date.now(),
+      release_id: parseInt(releaseId),
+      arch: arch,
+      platform: platform,
+      hash: hash || "",
+      size: size,
+      url: result.url,
+    });
+  } catch (err) {
+    try { fs.unlinkSync(req.file.path); } catch {}
+    res.status(500).json({ message: err.message });
+  }
+}
 
 // ===========================================================
 // POST /api/v1/apps/:appId/patches — Create patch
