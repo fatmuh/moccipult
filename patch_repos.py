@@ -9,7 +9,7 @@ Usage:
     python patch_repos.py --shorebird-path /path/to/shorebird --updater-path /path/to/updater --target-url http://localhost:3000
 
 Environment Variables:
-    SHOREBIRD_API_URL  — Target URL to replace Shorebird endpoints with
+    SHOREBIRD_API_URL   Target URL to replace Shorebird endpoints with
 """
 
 import os
@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("patch-repos")
 
-# ─── Patterns to find and replace ───────────────────────────────────────────
+#  Patterns to find and replace 
 
 # Each tuple: (pattern_to_search, description)
 REPLACEMENTS: List[Tuple[str, str]] = [
@@ -91,11 +91,12 @@ SKIP_DIRS = {
     ".git", ".dart_tool", "build", "node_modules",
     "__pycache__", ".gradle", ".idea", "target",
     "dist", ".tox", "venv", ".venv",
+    "bin", "cache", "engine", "flutter",
 }
 
 
 # Pattern to detect a previously patched URL (non-Shorebird custom URL)
-# Matches: http://something, https://something — but NOT shorebird.dev/cloud
+# Matches: http://something, https://something  but NOT shorebird.dev/cloud
 _PREVIOUS_PATCH_PATTERN = re.compile(
     r"https?://(?!api\.shorebird\.dev|auth\.shorebird\.dev|console\.shorebird\.dev"
     r"|cdn\.shorebird\.cloud|download\.shorebird\.dev|shorebird\.cloud"
@@ -294,13 +295,13 @@ def scan_directory(directory: str, target_url: str, dry_run: bool = False) -> di
                         "replacement": change["replacement"],
                     }
                     stats["details"].append(detail)
-                    log.info(f"  📝 {relative_path}: {change['original']} → {change['replacement']}")
+                    log.info(f"   {relative_path}: {change['original']} -> {change['replacement']}")
 
                 if not dry_run:
                     filepath.write_text(new_content, encoding="utf-8")
-                    log.info(f"  ✅ Patched: {relative_path}")
+                    log.info(f"  [OK] Patched: {relative_path}")
                 else:
-                    log.info(f"  🔍 [DRY RUN] Would patch: {relative_path}")
+                    log.info(f"   [DRY RUN] Would patch: {relative_path}")
 
     # After patching, invalidate the Shorebird snapshot cache so the
     # patched source files get recompiled on next run.
@@ -312,12 +313,12 @@ def scan_directory(directory: str, target_url: str, dry_run: bool = False) -> di
         for stamp_file in stamp_candidates:
             if stamp_file.exists():
                 stamp_file.unlink()
-                log.info(f"  🗑️  Deleted cache: {stamp_file.name}")
+                log.info(f"    Deleted cache: {stamp_file.name}")
 
         # Save the patched URL for future re-patching
         url_stamp = Path(directory) / ".moccipult-url"
         url_stamp.write_text(target_url.rstrip("/"))
-        log.info(f"  📌 Saved URL stamp: {target_url}")
+        log.info(f"   Saved URL stamp: {target_url}")
 
     return stats
 
@@ -373,21 +374,21 @@ Examples:
     target_url = args.target_url or os.environ.get("SHOREBIRD_API_URL") or "http://localhost:3000"
 
     print(f"""
-╔══════════════════════════════════════════════════╗
-║    🔧 Shorebird Repository Patcher              ║
-║                                                  ║
-║    Target URL: {target_url:<37}║
-║    Dry Run:    {str(args.dry_run):<37}║
-╚══════════════════════════════════════════════════╝
++==================================================+
+|    [PATCH] Shorebird Repository Patcher              |
+|                                                  |
+|    Target URL: {target_url:<37}|
+|    Dry Run:    {str(args.dry_run):<37}|
++==================================================+
     """)
 
     # Scan shorebird repo
-    print(f"📂 Scanning shorebird repo: {args.shorebird_path}")
+    print(f"[SCAN] Scanning shorebird repo: {args.shorebird_path}")
     stats = scan_directory(args.shorebird_path, target_url, args.dry_run)
 
     # Optionally scan updater repo
     if args.updater_path:
-        print(f"\n📂 Scanning updater repo: {args.updater_path}")
+        print(f"\n[SCAN] Scanning updater repo: {args.updater_path}")
         updater_stats = scan_directory(args.updater_path, target_url, args.dry_run)
         stats["files_scanned"] += updater_stats["files_scanned"]
         stats["files_modified"] += updater_stats["files_modified"]
@@ -396,28 +397,28 @@ Examples:
 
     # Print summary
     print(f"""
-╔══════════════════════════════════════════════════╗
-║    📊 Summary                                    ║
-║                                                  ║
-║    Files Scanned:     {stats['files_scanned']:<27}║
-║    Files Modified:    {stats['files_modified']:<27}║
-║    Total Replacements:{stats['total_replacements']:<27}║
-║    Dry Run:           {str(args.dry_run):<27}║
-╚══════════════════════════════════════════════════╝
++==================================================+
+|    [STATS] Summary                                    |
+|                                                  |
+|    Files Scanned:     {stats['files_scanned']:<27}|
+|    Files Modified:    {stats['files_modified']:<27}|
+|    Total Replacements:{stats['total_replacements']:<27}|
+|    Dry Run:           {str(args.dry_run):<27}|
++==================================================+
     """)
 
     if stats["details"]:
-        print("📋 Detailed changes:")
+        print("[LIST] Detailed changes:")
         for d in stats["details"][:50]:  # Show first 50
-            print(f"  • {d['file']}: {d['original']} → {d['replacement']}")
+            print(f"  * {d['file']}: {d['original']} -> {d['replacement']}")
         if len(stats["details"]) > 50:
             print(f"  ... and {len(stats['details']) - 50} more changes")
 
     if args.dry_run:
-        print("\n⚠️  This was a dry run. No files were modified.")
+        print("\n[WARN]  This was a dry run. No files were modified.")
         print("   Run without --dry-run to apply changes.")
     else:
-        print("\n✅ All changes applied successfully!")
+        print("\n[OK] All changes applied successfully!")
 
 
 if __name__ == "__main__":

@@ -564,6 +564,152 @@ program
     }
   });
 
+// ─── INIT (wraps shorebird init) ────────────────────────────────────────────
+program
+  .command("init")
+  .description("Initialize Shorebird in current Flutter project")
+  .option("--force", "Force re-initialization")
+  .option("--flavor <flavor>", "Flavor")
+  .action(async (opts) => {
+    const { execSync } = require("child_process");
+    const serverUrl = getServer();
+
+    console.log(chalk.bold.cyan(BANNER));
+    console.log(chalk.bold("  📱 Init Flutter project\n"));
+    console.log(chalk.dim(`  Server: ${serverUrl}\n`));
+
+    // Make sure shorebird is patched
+    const sbBat = findShorebirdBinary();
+    if (!sbBat) {
+      console.log(chalk.red("  ❌ Shorebird belum terinstall."));
+      console.log(chalk.white("  Jalankan dulu: "), chalk.cyan("moccipult setup-shorebird"));
+      return;
+    }
+
+    const spinner = ora("Running shorebird init...").start();
+    try {
+      const args = ["init"];
+      if (opts.force) args.push("--force");
+      if (opts.flavor) args.push("--flavor", opts.flavor);
+      execSync(`"${sbBat}" ${args.join(" ")}`, {
+        stdio: "inherit",
+        shell: true,
+        env: { ...process.env, PYTHONIOENCODING: "utf-8" },
+      });
+      spinner.succeed(chalk.green("Project initialized!"));
+    } catch (err) {
+      spinner.fail(chalk.red("Init gagal"));
+    }
+  });
+
+// ─── RELEASE (wraps shorebird release) ───────────────────────────────────────
+program
+  .command("release")
+  .description("Build a release (wraps shorebird release)")
+  .argument("[platform]", "Platform (android/ios)", "android")
+  .option("--flavor <flavor>", "Flavor")
+  .option("--target <target>", "Target (lib/main.dart)")
+  .option("--verbose", "Verbose output")
+  .action(async (platform, opts) => {
+    const { execSync } = require("child_process");
+    const serverUrl = getServer();
+
+    console.log(chalk.bold.cyan(BANNER));
+    console.log(chalk.bold(`  🚀 Release ${platform}\n`));
+    console.log(chalk.dim(`  Server: ${serverUrl}\n`));
+
+    const sbBat = findShorebirdBinary();
+    if (!sbBat) {
+      console.log(chalk.red("  ❌ Shorebird belum terinstall."));
+      console.log(chalk.white("  Jalankan dulu: "), chalk.cyan("moccipult setup-shorebird"));
+      return;
+    }
+
+    const args = ["release", platform];
+    if (opts.flavor) args.push("--flavor", opts.flavor);
+    if (opts.target) args.push("--target", opts.target);
+    if (opts.verbose) args.push("--verbose");
+
+    console.log(chalk.cyan(`  $ shorebird ${args.join(" ")}`));
+    console.log();
+
+    try {
+      execSync(`"${sbBat}" ${args.join(" ")}`, {
+        stdio: "inherit",
+        shell: true,
+        env: { ...process.env, PYTHONIOENCODING: "utf-8" },
+      });
+    } catch (err) {
+      // shorebird prints its own errors
+    }
+  });
+
+// ─── PATCH (wraps shorebird patch) ──────────────────────────────────────────
+program
+  .command("patch")
+  .description("Deploy a patch (wraps shorebird patch)")
+  .argument("[platform]", "Platform (android/ios)", "android")
+  .option("--flavor <flavor>", "Flavor")
+  .option("--target <target>", "Target (lib/main.dart)")
+  .option("--staging", "Staging release")
+  .option("--verbose", "Verbose output")
+  .action(async (platform, opts) => {
+    const { execSync } = require("child_process");
+    const serverUrl = getServer();
+
+    console.log(chalk.bold.cyan(BANNER));
+    console.log(chalk.bold(`  🔧 Patch ${platform}\n`));
+    console.log(chalk.dim(`  Server: ${serverUrl}`));
+    console.log(chalk.dim(`  Patches will be uploaded to: ${serverUrl}\n`));
+
+    const sbBat = findShorebirdBinary();
+    if (!sbBat) {
+      console.log(chalk.red("  ❌ Shorebird belum terinstall."));
+      console.log(chalk.white("  Jalankan dulu: "), chalk.cyan("moccipult setup-shorebird"));
+      return;
+    }
+
+    const args = ["patch", platform];
+    if (opts.flavor) args.push("--flavor", opts.flavor);
+    if (opts.target) args.push("--target", opts.target);
+    if (opts.staging) args.push("--staging");
+    if (opts.verbose) args.push("--verbose");
+
+    console.log(chalk.cyan(`  $ shorebird ${args.join(" ")}`));
+    console.log();
+
+    try {
+      execSync(`"${sbBat}" ${args.join(" ")}`, {
+        stdio: "inherit",
+        shell: true,
+        env: { ...process.env, PYTHONIOENCODING: "utf-8" },
+      });
+    } catch (err) {
+      // shorebird prints its own errors
+    }
+  });
+
+// ─── HELPER: Find Shorebird binary ─────────────────────────────────────────
+function findShorebirdBinary() {
+  const possiblePaths = [
+    path.join(os.homedir(), ".shorebird"),
+    path.join(process.env.LOCALAPPDATA || "", "shorebird"),
+    path.join(process.env.USERPROFILE || "", ".shorebird"),
+  ];
+
+  for (const p of possiblePaths) {
+    const binDir = path.join(p, "bin");
+    if (process.platform === "win32") {
+      for (const c of ["shorebird.bat", "shorebird.exe", "shorebird"]) {
+        if (fs.existsSync(path.join(binDir, c))) return path.join(binDir, c);
+      }
+    } else {
+      if (fs.existsSync(path.join(binDir, "shorebird"))) return path.join(binDir, "shorebird");
+    }
+  }
+  return null;
+}
+
 // ─── STATUS ─────────────────────────────────────────────────────────────────
 program
   .command("status")

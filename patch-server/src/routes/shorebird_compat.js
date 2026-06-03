@@ -39,23 +39,34 @@ function toNumericId(uuid) {
   return parseInt(hash.readUInt32BE(0), 10);
 }
 
-// ─── Fake authenticated user ─────────────────────────────────────────────
-const FAKE_USER = {
-  id: 1,
-  email: "dev@moccipult.local",
-  name: "Moccipult Developer",
-};
+// ─── Helpers ───────────────────────────────────────────────────────────────
+const NOW = () => new Date().toISOString();
 
-const FAKE_ORG = {
-  id: 1,
-  name: "Moccipult",
-};
+// Fake IDs
+const FAKE_USER_ID = 1;
+const FAKE_ORG_ID = 1;
 
-// ===========================================================
 // GET /api/v1/users/me — Return current (fake) user
-// ===========================================================
+// PrivateUser expects: id, email, name, memberships (list of {organization, role})
 router.get("/users/me", (req, res) => {
-  res.json(FAKE_USER);
+  const now = NOW();
+  res.json({
+    id: FAKE_USER_ID,
+    email: "dev@moccipult.local",
+    name: "Moccipult Developer",
+    memberships: [
+      {
+        organization: {
+          id: FAKE_ORG_ID,
+          name: "Moccipult",
+          organization_type: "personal",
+          created_at: now,
+          updated_at: now,
+        },
+        role: "owner",
+      },
+    ],
+  });
 });
 
 // ===========================================================
@@ -63,68 +74,70 @@ router.get("/users/me", (req, res) => {
 // ===========================================================
 router.post("/users", (req, res) => {
   const { name } = req.body || {};
-  res.json({ ...FAKE_USER, name: name || FAKE_USER.name });
-});
-
-// ===========================================================
-// GET /api/v1/organizations — List fake organizations
-// ===========================================================
-router.get("/organizations", (req, res) => {
+  const now = NOW();
   res.json({
-    organizations: [
+    id: FAKE_USER_ID,
+    email: "dev@moccipult.local",
+    name: name || "Moccipult Developer",
+    memberships: [
       {
-        organization: FAKE_ORG,
-        role: "admin",
+        organization: {
+          id: FAKE_ORG_ID,
+          name: "Moccipult",
+          organization_type: "personal",
+          created_at: now,
+          updated_at: now,
+        },
+        role: "owner",
       },
     ],
   });
 });
 
 // ===========================================================
-// GET /api/v1/apps — List apps (Shorebird format)
+// GET /api/v1/organizations — List fake organizations
 // ===========================================================
+router.get("/organizations", (req, res) => {
+  const now = new Date().toISOString();
+  res.json({
+    organizations: [
+      {
+        organization: {
+          id: 1,
+          name: "Moccipult",
+          organization_type: "personal",
+          created_at: now,
+          updated_at: now,
+        },
+        role: "owner",
+      },
+    ],
+  });
+});
+
+// GET /api/v1/apps — List apps (Shorebird AppMetadata format)
 router.get("/apps", (req, res) => {
   const db = getDb();
   const apps = db.prepare("SELECT * FROM apps ORDER BY created_at DESC").all();
   res.json({
     apps: apps.map((app) => ({
-      id: app.id,
-      displayName: app.name,
-      // Shorebird uses int IDs for release/patch, but string UUID for app
+      app_id: app.id,
+      display_name: app.name,
+      latest_release_version: null,
+      latest_patch_number: null,
+      created_at: app.created_at,
+      updated_at: app.updated_at,
     })),
   });
 });
 
-// ===========================================================
-// POST /api/v1/apps — Create app (Shorebird format)
-// ===========================================================
-router.post("/apps", (req, res) => {
-  const { displayName, organizationId } = req.body || {};
-  if (!displayName) {
-    return res.status(400).json({ message: "displayName is required" });
-  }
+// POST /api/v1/apps is handled by apps.js (registered first)
+// We don't add a duplicate here to avoid conflicts.
 
-  const db = getDb();
-  const id = uuidv4();
-
-  try {
-    db.prepare(
-      `INSERT INTO apps (id, name, platform) VALUES (?, ?, 'android')`
-    ).run(id, displayName);
-
-    res.json({ id, displayName });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// ===========================================================
-// GET /api/v1/apps/:appId/releases — List releases
-// ===========================================================
+// GET /api/v1/apps/:appId/releases — List releases (Shorebird Release format)
 router.get("/apps/:appId/releases", (req, res) => {
   const db = getDb();
   const { appId } = req.params;
-  const { sideloadable } = req.query;
 
   let releases = db
     .prepare("SELECT * FROM releases WHERE app_id = ? ORDER BY created_at DESC")
@@ -133,14 +146,14 @@ router.get("/apps/:appId/releases", (req, res) => {
   res.json({
     releases: releases.map((r) => ({
       id: toNumericId(r.id),
+      app_id: appId,
       version: r.version,
-      platform: { name: r.platform || "android" },
-      channel: { name: r.channel || "stable", id: 1 },
-      displayName: r.version,
-      sideloadable: true,
-      status: { name: "active" },
-      createdAt: r.created_at,
-      updatedAt: r.created_at,
+      flutter_revision: "0000000000000000000000000000000000000000",
+      flutter_version: null,
+      display_name: r.version,
+      platform_statuses: { android: "active" },
+      created_at: r.created_at,
+      updated_at: r.created_at,
     })),
   });
 });
@@ -164,16 +177,17 @@ router.post("/apps/:appId/releases", (req, res) => {
        VALUES (?, ?, ?, 'android', 'stable')`
     ).run(id, appId, version);
 
+    const now = NOW();
     const release = {
       id: toNumericId(id),
+      app_id: appId,
       version,
-      platform: { name: "android" },
-      channel: { name: "stable", id: 1 },
-      displayName: display_name || version,
-      sideloadable: true,
-      status: { name: "active" },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      flutter_revision: flutter_revision || "0000000000000000000000000000000000000000",
+      flutter_version: flutter_version || null,
+      display_name: display_name || version,
+      platform_statuses: { android: "active" },
+      created_at: now,
+      updated_at: now,
     };
 
     res.json({ release });
@@ -200,16 +214,10 @@ router.get("/apps/:appId/releases/:releaseId/patches", (req, res) => {
   const db = getDb();
   const { appId, releaseId } = req.params;
 
-  // releaseId might be numeric (from our toNumericId), find the actual release
-  let releases = db
-    .prepare("SELECT * FROM releases WHERE app_id = ?")
-    .all(appId);
-
-  // Try to match by numeric id
+  // Find release by numeric ID
+  let releases = db.prepare("SELECT * FROM releases WHERE app_id = ?").all(appId);
   let release = releases.find((r) => toNumericId(r.id) === parseInt(releaseId));
-  if (!release) {
-    release = releases[0]; // fallback to first
-  }
+  if (!release) release = releases[0];
 
   if (!release) {
     return res.json({ patches: [] });
@@ -223,10 +231,10 @@ router.get("/apps/:appId/releases/:releaseId/patches", (req, res) => {
     patches: patches.map((p) => ({
       id: toNumericId(p.id),
       number: p.patch_number,
-      channel: { name: "stable", id: 1 },
-      status: { name: p.status === "active" ? "active" : "disabled" },
-      createdAt: p.created_at,
-      updatedAt: p.created_at,
+      channel: "stable",
+      artifacts: [],
+      is_rolled_back: p.status === "rolled_back",
+      notes: null,
     })),
   });
 });
@@ -275,15 +283,13 @@ router.post(
 
       // Return a presigned-style URL for upload confirmation
       res.json({
-        url: `${result.url}?upload=true`,
-        artifact: {
-          id: Date.now(),
-          arch,
-          platform,
-          hash,
-          size: parseInt(size),
-          url: result.url,
-        },
+        id: Date.now(),
+        release_id: parseInt(releaseId),
+        arch: arch,
+        platform: platform,
+        hash: hash || "",
+        size: parseInt(size) || 0,
+        url: result.url,
       });
     } catch (err) {
       try { fs.unlinkSync(req.file.path); } catch {}
@@ -325,10 +331,6 @@ router.post("/apps/:appId/patches", (req, res) => {
   res.json({
     id: numericPatchId,
     number: patchNumber,
-    channel: { name: "stable", id: 1 },
-    status: { name: "active" },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   });
 });
 
@@ -374,9 +376,15 @@ router.post(
         `UPDATE patches SET download_url = ?, file_hash = ?, file_size = ?, file_path = ? WHERE id = ?`
       ).run(result.url, fileHash, fileSize, storageKey, patch.id);
 
-      // Return upload URL for the artifact
+      // Return in CreatePatchArtifactResponse format
       res.json({
-        url: `${result.url}?upload=true`,
+        id: Date.now(),
+        patch_id: parseInt(patchId),
+        arch: arch,
+        platform: platformName,
+        hash: fileHash,
+        size: fileSize,
+        url: result.url,
       });
     } catch (err) {
       try { fs.unlinkSync(req.file.path); } catch {}

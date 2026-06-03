@@ -27,9 +27,14 @@ router.post("/apps", (req, res) => {
     res.status(201).json({
       ok: true,
       app,
-      // Shorebird CodePushClient expects flat { id, displayName }
+      // Shorebird CodePushClient expects: { id, displayName }
+      // but AppMetadata expects: { app_id, display_name, created_at, updated_at }
       id: app.id,
       displayName: app.name,
+      app_id: app.id,
+      display_name: app.name,
+      created_at: app.created_at,
+      updated_at: app.updated_at,
     });
   } catch (err) {
     console.error("Error creating app:", err);
