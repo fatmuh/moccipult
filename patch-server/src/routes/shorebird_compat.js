@@ -53,7 +53,11 @@ router.get("/users/me", (req, res) => {
   res.json({
     id: FAKE_USER_ID,
     email: "dev@moccipult.local",
-    name: "Moccipult Developer",
+    display_name: "Moccipult Developer",
+    jwt_issuer: "moccipult",
+    has_active_subscription: true,
+    stripe_customer_id: null,
+    patch_overage_limit: null,
     memberships: [
       {
         organization: {
