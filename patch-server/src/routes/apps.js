@@ -7,7 +7,8 @@ const { getDb } = require("../database");
 // POST /api/v1/apps — Register a new app
 // =============================================
 router.post("/apps", (req, res) => {
-  const { name, package_name, platform } = req.body;
+  const name = req.body.name || req.body.displayName;
+  const { package_name, platform, organizationId, displayName } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: "App name is required" });
@@ -22,7 +23,14 @@ router.post("/apps", (req, res) => {
     ).run(id, name, package_name || null, platform || "android");
 
     const app = db.prepare("SELECT * FROM apps WHERE id = ?").get(id);
-    res.status(201).json({ ok: true, app });
+    // Return in both Moccipult and Shorebird formats
+    res.status(201).json({
+      ok: true,
+      app,
+      // Shorebird CodePushClient expects flat { id, displayName }
+      id: app.id,
+      displayName: app.name,
+    });
   } catch (err) {
     console.error("Error creating app:", err);
     res.status(500).json({ error: "Failed to create app" });
@@ -35,7 +43,15 @@ router.post("/apps", (req, res) => {
 router.get("/apps", (req, res) => {
   const db = getDb();
   const apps = db.prepare("SELECT * FROM apps ORDER BY created_at DESC").all();
-  res.json({ ok: true, apps });
+  // Return in Shorebird-compatible format: { apps: [...] }
+  res.json({
+    ok: true,
+    apps: apps.map((app) => ({
+      ...app,
+      id: app.id,
+      displayName: app.name,
+    })),
+  });
 });
 
 // =============================================

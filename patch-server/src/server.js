@@ -9,6 +9,7 @@ const appsRouter = require("./routes/apps");
 const patchesRouter = require("./routes/patches");
 const downloadsRouter = require("./routes/downloads");
 const docsRouter = require("./routes/docs");
+const shorebirdCompatRouter = require("./routes/shorebird_compat");
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
@@ -57,9 +58,15 @@ app.get("/health", (req, res) => {
   });
 });
 
-// API Routes
+// API Routes (our custom Moccipult API)
 app.use("/api/v1", appsRouter);
 app.use("/api/v1", patchesRouter);
+
+// Shorebird CLI compatibility layer
+// This MUST be registered after our routes but handles all the
+// endpoints that CodePushClient expects (users, organizations, etc.)
+app.use("/api/v1", shorebirdCompatRouter);
+
 app.use("/", downloadsRouter);
 
 // Error handler
