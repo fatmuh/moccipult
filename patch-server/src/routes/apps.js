@@ -24,18 +24,20 @@ router.post("/apps", (req, res) => {
     ).run(id, name, package_name || null, platform || "android");
 
     const app = db.prepare("SELECT * FROM apps WHERE id = ?").get(id);
+    // Convert SQLite timestamps to ISO 8601 for Dart compatibility
+    const isoDate = (d) => d ? d.replace(' ', 'T') + 'Z' : d;
     // Return in both Moccipult and Shorebird formats
     res.status(201).json({
       ok: true,
-      app,
+      app: {...app, created_at: isoDate(app.created_at), updated_at: isoDate(app.updated_at)},
       // Shorebird CodePushClient expects: { id, displayName }
       // but AppMetadata expects: { app_id, display_name, created_at, updated_at }
       id: app.id,
       displayName: app.name,
       app_id: app.id,
       display_name: app.name,
-      created_at: app.created_at,
-      updated_at: app.updated_at,
+      created_at: isoDate(app.created_at),
+      updated_at: isoDate(app.updated_at),
     });
   } catch (err) {
     console.error("Error creating app:", err);
