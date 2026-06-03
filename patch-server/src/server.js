@@ -41,8 +41,16 @@ const app = express();
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(morgan("combined"));
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "10mb", type: ["application/json", "text/plain", "application/x-www-form-urlencoded"] }));
 app.use(express.urlencoded({ extended: true }));
+
+// Debug: log request bodies for Shorebird compat
+app.use((req, res, next) => {
+  if (req.method === "POST" && req.path.includes("apps")) {
+    console.log(`[DEBUG] ${req.method} ${req.path} Content-Type: ${req.get("Content-Type")} Body:`, JSON.stringify(req.body));
+  }
+  next();
+});
 
 // Documentation (root)
 app.use("/", docsRouter);
