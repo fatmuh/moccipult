@@ -155,12 +155,12 @@ router.get("/apps/:appId/releases", (req, res) => {
       id: toNumericId(r.id),
       app_id: appId,
       version: r.version,
-      flutter_revision: "0000000000000000000000000000000000000000",
-      flutter_version: null,
-      display_name: r.version,
+      flutter_revision: r.flutter_revision || "0000000000000000000000000000000000000000",
+      flutter_version: r.flutter_version || null,
+      display_name: r.display_name || r.version,
       platform_statuses: { android: "active" },
       created_at: r.created_at,
-      updated_at: r.created_at,
+      updated_at: r.updated_at || r.created_at,
     })),
   });
 });
@@ -180,9 +180,18 @@ router.post("/apps/:appId/releases", (req, res) => {
   const id = uuidv4();
   try {
     db.prepare(
-      `INSERT INTO releases (id, app_id, version, platform, channel)
-       VALUES (?, ?, ?, 'android', 'stable')`
-    ).run(id, appId, version);
+      `INSERT INTO releases (id, app_id, version, platform, channel, flutter_revision, flutter_version, display_name, created_at, updated_at)
+       VALUES (?, ?, ?, 'android', 'stable', ?, ?, ?, ?, ?)`
+    ).run(
+      id,
+      appId,
+      version,
+      flutter_revision || "0000000000000000000000000000000000000000",
+      flutter_version || null,
+      display_name || version,
+      NOW(),
+      NOW()
+    );
 
     const now = NOW();
     const release = {

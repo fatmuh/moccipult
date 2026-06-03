@@ -22,6 +22,25 @@ function getDb() {
   return db;
 }
 
+function migrate(db) {
+  // Migration: add new columns to existing tables
+  // SQLite doesn't support IF NOT EXISTS for columns, so we use try/catch
+  const releaseCols = db.prepare("PRAGMA table_info(releases)").all();
+  const releaseColNames = releaseCols.map(c => c.name);
+  if (!releaseColNames.includes("flutter_revision")) {
+    db.exec("ALTER TABLE releases ADD COLUMN flutter_revision TEXT DEFAULT ''");
+  }
+  if (!releaseColNames.includes("flutter_version")) {
+    db.exec("ALTER TABLE releases ADD COLUMN flutter_version TEXT DEFAULT NULL");
+  }
+  if (!releaseColNames.includes("display_name")) {
+    db.exec("ALTER TABLE releases ADD COLUMN display_name TEXT DEFAULT ''");
+  }
+  if (!releaseColNames.includes("updated_at")) {
+    db.exec("ALTER TABLE releases ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))");
+  }
+}
+
 function initDatabase() {
   const db = getDb();
 
@@ -41,10 +60,18 @@ function initDatabase() {
       version TEXT NOT NULL,
       platform TEXT DEFAULT 'android',
       channel TEXT DEFAULT 'stable',
+      flutter_revision TEXT DEFAULT '',
+      flutter_version TEXT DEFAULT NULL,
+      display_name TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (app_id) REFERENCES apps(id),
       UNIQUE(app_id, version, platform, channel)
     );
+
+    -- Migration: add missing columns if they don't exist (for older DBs)
+    -- SQLite doesn't support IF NOT EXISTS for columns, so we use try/catch via a no-op
+    -- The migration is handled in code by checking column existence.
 
     CREATE TABLE IF NOT EXISTS patches (
       id TEXT PRIMARY KEY,
@@ -64,8 +91,11 @@ function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_releases_app ON releases(app_id);
   `);
 
+  // Run migrations to add new columns to existing tables
+  migrate(db);
+
   console.log("✅ Database initialized successfully");
   return db;
 }
 
-module.exports = { getDb, initDatabase };
+module.exports = { getDb, initDatabase, migrate };
